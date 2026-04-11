@@ -29,6 +29,10 @@ switch ($view) {
         $content = 'view.php';
         $subtitle = 'Exam Details';
         break;
+    case 'batch_add':
+        $content = 'batch_add.php';
+        $subtitle = 'Batch Add/Edit Results';
+        break;
     default:
         $content = 'schedule.php';
         $subtitle = 'Exam Schedule';

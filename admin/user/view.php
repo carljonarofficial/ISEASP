@@ -89,7 +89,7 @@ if(!$singleuser){
                                     <label class="col-md-3 control-label" for="U_USERNAME">Username:</label>
                                     <div class="col-md-8">
                                         <div class="input-group">
-                                            <span class="input-group-addon"><i class="fa fa-user-circle"></i></span>
+                                            <span class="input-group-addon"><i class="fa fa-user"></i></span>
                                             <input class="form-control input-sm" id="U_USERNAME" name="USERNAME" 
                                                    placeholder="Username" type="text" 
                                                    value="<?php echo htmlspecialchars($singleuser->USERNAME); ?>" required>
@@ -297,7 +297,7 @@ document.getElementById('profileForm').addEventListener('submit', function(e) {
 }
 .input-group-addon {
     background-color: #27ae60;
-    color: white;
+    color: black;
     border: 1px solid #27ae60;
 }
 .btn-primary {

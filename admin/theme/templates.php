@@ -61,6 +61,11 @@
         .box {
             border-top-color: #27ae60;
         }
+        @media (min-width: 768px) {
+            .sidebar-mini.sidebar-collapse .main-header .logo {
+                padding-left: 6px;
+            }
+        }
     </style>
 </head>
 
@@ -70,8 +75,7 @@
         <!-- Header -->
         <header class="main-header">
             <a href="<?php echo web_root;?>admin/" class="logo">
-                <span class="logo-lg"><b>ISEASP</b></span>
-                <span class="logo-mini"><b>ISEA</b></span>
+                <img src="<?php echo web_root;?>uploads/iseasp_logo.png" alt="ISEASP Logo" width="40" height="40" class="d-inline-block align-text-top"> ISEASP
             </a>
 
             <nav class="navbar navbar-static-top" role="navigation">
@@ -176,7 +180,7 @@
                 <!-- User Panel -->
                 <div class="user-panel">
                     <div class="pull-left image">
-                        <img src="<?php echo web_root.'admin/user/photos/'. $singleuser->PICLOCATION;?>" class="img-circle" alt="User Image"  style="height: 40px;">
+                        <img src="<?php echo web_root.'admin/user/photos/'. $singleuser->PICLOCATION;?>" class="img-circle" alt="User Image" width="45" height="45">
                     </div>
                     <div class="pull-left info">
                         <p><?php echo $singleuser->FULLNAME; ?></p>
@@ -210,8 +214,8 @@
                         </a>
                     </li>
 
-                    <!-- Applicants Section -->
-                    <li class="treeview <?php echo (strpos($_SERVER['REQUEST_URI'], 'applications') !== false) ? "active" : "";?>">
+                    <!-- Applicants & Requirements -->
+                    <li class="treeview <?php echo (strpos($_SERVER['REQUEST_URI'], 'applications') !== false || strpos($_SERVER['REQUEST_URI'], 'checklist') !== false) ? "active" : "";?>">
                         <a href="#">
                             <i class="fa fa-users"></i> <span>Applicants</span>
                             <span class="pull-right-container">
@@ -221,23 +225,6 @@
                         <ul class="treeview-menu">
                             <li><a href="<?php echo web_root;?>admin/applications/"><i class="fa fa-circle-o"></i> All Applicants</a></li>
                             <li><a href="<?php echo web_root;?>admin/applications/index.php?view=add"><i class="fa fa-circle-o"></i> Add New Applicant</a></li>
-                            <li><a href="<?php echo web_root;?>admin/applications/index.php?view=missing_requirements"><i class="fa fa-circle-o"></i> Missing Requirements</a></li>
-                            <!-- <li><a href="<?php echo web_root;?>admin/applications/index.php?view=for_exam"><i class="fa fa-circle-o"></i> For Examination</a></li>
-                            <li><a href="<?php echo web_root;?>admin/applications/index.php?view=for_evaluation"><i class="fa fa-circle-o"></i> For Evaluation</a></li>
-                            <li><a href="<?php echo web_root;?>admin/applications/index.php?view=for_interview"><i class="fa fa-circle-o"></i> For Interview</a></li>
-                            <li><a href="<?php echo web_root;?>admin/applications/index.php?view=qualified"><i class="fa fa-circle-o"></i> Qualified</a></li> -->
-                        </ul>
-                    </li>
-
-                    <!-- Requirements Checklist -->
-                    <li class="treeview <?php echo (strpos($_SERVER['REQUEST_URI'], 'checklist') !== false) ? "active" : "";?>">
-                        <a href="#">
-                            <i class="fa fa-check-square-o"></i> <span>Requirements</span>
-                            <span class="pull-right-container">
-                                <i class="fa fa-angle-left pull-right"></i>
-                            </span>
-                        </a>
-                        <ul class="treeview-menu">
                             <li><a href="<?php echo web_root;?>admin/checklist/"><i class="fa fa-circle-o"></i> Applicant Checklist</a></li>
                             <li><a href="<?php echo web_root;?>admin/checklist/index.php?view=manage_req"><i class="fa fa-circle-o"></i> Manage Requirements</a></li>
                         </ul>

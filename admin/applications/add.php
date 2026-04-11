@@ -61,7 +61,7 @@ body {
 
 .page-header h1 {
     margin: 0;
-    font-size: 2.5em;
+    font-size: 1em;
     font-weight: 600;
     text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
 }
@@ -72,6 +72,7 @@ body {
     margin-top: 10px;
     opacity: 0.9;
     font-weight: 300;
+    color: white;
 }
 
 .instruction-card {
@@ -142,7 +143,7 @@ body {
 
 .instruction-list li strong {
     color: var(--primary-dark);
-    margin-right: 5px;
+    margin: 0px 5px;
 }
 
 .warning-highlight {
@@ -257,14 +258,16 @@ body {
 }
 
 .form-group select.form-control {
-    min-height: 46px;
+    min-height: 0;
+    line-height: 16px;
+    padding: 0px 12px;
 }
 
 select.form-control {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%232c3e50' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
     background-repeat: no-repeat;
-    background-position: right 15px center;
-    background-size: 16px;
+    background-position: right 4px center;
+    background-size: 12px;
     padding-right: 45px;
     cursor: pointer;
     white-space: nowrap;
@@ -602,7 +605,7 @@ textarea.form-control {
 
 @media (max-width: 768px) {
     .page-header h1 {
-        font-size: 1.8em;
+        font-size: 1em;
     }
     
     .instruction-list {
@@ -631,6 +634,25 @@ textarea.form-control {
         width: 100%;
         margin: 10px 0;
     }
+}
+
+.requirement-item.checked {
+    background-color: var(--success-color);
+    color: white;
+    border-left-color: var(--success-color);
+}
+
+.requirement-item.checked .checkbox label {
+    color: white;
+}
+
+.requirement-item.checked .checkbox small {
+    color: rgba(255,255,255,0.8);
+}
+
+.requirements-category.completed {
+    border: 2px solid var(--success-color) !important;
+    border-radius: 8px;
 }
 </style>
 
@@ -667,6 +689,7 @@ textarea.form-control {
         </div>
         <div class="instruction-body">
             <ul class="instruction-list">
+                
                 <li><i class="fa fa-arrow-up"></i> All entries should be in <strong>UPPERCASE</strong> format</li>
                 <li><i class="fa fa-check-square-o"></i> Place <strong>(X)</strong> in the appropriate space provided</li>
                 <li><i class="fa fa-ban"></i> Put <strong>N/A</strong> if not applicable</li>
@@ -791,14 +814,14 @@ textarea.form-control {
                     </div>
                     <div class="form-group">
                         <label><i class="fa fa-heart"></i> Relationship</label>
-                        <select name="EMERGENCY_CONTACT_RELATION" class="form-control">
-                            <option value="">SELECT</option>
-                            <option value="Father">Father</option>
-                            <option value="Mother">Mother</option>
-                            <option value="Guardian">Guardian</option>
-                            <option value="Spouse">Spouse</option>
-                            <option value="Sibling">Sibling</option>
-                            <option value="Relative">Relative</option>
+                        <select name="EMERGENCY_CONTACT_RELATION" class="form-control" style="color: #000;">
+                            <option value="" style="color: #000;">SELECT</option>
+                            <option value="Father" style="color: #000;">Father</option>
+                            <option value="Mother" style="color: #000;">Mother</option>
+                            <option value="Guardian" style="color: #000;">Guardian</option>
+                            <option value="Spouse" style="color: #000;">Spouse</option>
+                            <option value="Sibling" style="color: #000;">Sibling</option>
+                            <option value="Relative" style="color: #000;">Relative</option>
                         </select>
                     </div>
                 </div>
@@ -823,18 +846,29 @@ textarea.form-control {
                     </div>
                     <div class="form-group">
                         <label><i class="fa fa-map-pin"></i> Barangay <span style="color:red;">*</span></span></label>
-                        <input type="text" name="PERM_BARANGAY" class="form-control" required placeholder="BARANGAY">
+                        <select name="PERM_BARANGAY" id="perm_barangay" class="form-control" required>
+                            <option value="">SELECT BARANGAY</option>
+                        </select>
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
                         <label><i class="fa fa-building"></i> Municipality / City <span style="color:red;">*</span></span></label>
-                        <input type="text" name="PERM_MUNICIPALITY" class="form-control" required placeholder="MUNICIPALITY OR CITY">
+                        <select name="PERM_MUNICIPALITY" class="form-control" required onchange="populateBarangays(this.value, 'perm_barangay')">
+                            <option value="">SELECT MUNICIPALITY</option>
+                            <?php
+                            $municipalities = $mydb->setQuery("SELECT * FROM tbl_municipalities WHERE IS_ACTIVE = 'Yes' ORDER BY MUNICIPALITY_NAME");
+                            $municipalities = $mydb->loadResultList();
+                            foreach($municipalities as $town):
+                            ?>
+                            <option value="<?php echo strtoupper($town->MUNICIPALITY_NAME); ?>"><?php echo strtoupper($town->MUNICIPALITY_NAME); ?></option>
+                            <?php endforeach; ?>
+                        </select>
                     </div>
                     <div class="form-group">
                         <label><i class="fa fa-globe"></i> Province <span style="color:red;">*</span></span></label>
-                        <input type="text" name="PERM_PROVINCE" class="form-control" required placeholder="PROVINCE">
+                        <input type="text" name="PERM_PROVINCE" class="form-control" required placeholder="PROVINCE" value="ILOCOS SUR" disabled>
                     </div>
                 </div>
 
@@ -854,18 +888,31 @@ textarea.form-control {
                     </div>
                     <div class="form-group">
                         <label><i class="fa fa-map-pin"></i> Barangay</label>
-                        <input type="text" name="CURR_BARANGAY" class="form-control" placeholder="BARANGAY">
+                        <select name="CURR_BARANGAY" id="curr_barangay" class="form-control" required>
+                            <option value="">SELECT BARANGAY</option>
+                        </select>
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
                         <label><i class="fa fa-building"></i> Municipality / City</label>
-                        <input type="text" name="CURR_MUNICIPALITY" class="form-control" placeholder="MUNICIPALITY OR CITY">
+                        <select name="CURR_MUNICIPALITY" class="form-control" required onchange="populateBarangays(this.value, 'curr_barangay')">
+                            <option value="">SELECT MUNICIPALITY</option>
+                            <?php
+                            $municipalities = $mydb->setQuery("SELECT * FROM tbl_municipalities WHERE IS_ACTIVE = 'Yes' ORDER BY MUNICIPALITY_NAME");
+                            $municipalities = $mydb->loadResultList();
+                            foreach ($municipalities as $town):
+                                ?>
+                                <option value="<?php echo strtoupper($town->MUNICIPALITY_NAME); ?>">
+                                    <?php echo strtoupper($town->MUNICIPALITY_NAME); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
                     </div>
                     <div class="form-group">
                         <label><i class="fa fa-globe"></i> Province</label>
-                        <input type="text" name="CURR_PROVINCE" class="form-control" placeholder="PROVINCE">
+                        <input type="text" name="CURR_PROVINCE" class="form-control" placeholder="PROVINCE" value="ILOCOS SUR" disabled>
                     </div>
                 </div>
 
@@ -901,9 +948,9 @@ textarea.form-control {
                     </div>
                     <div class="form-group">
                         <label><i class="fa fa-calendar"></i> School Year</label>
-                        <select name="SCHOOL_YEAR" class="form-control">
-                            <option value="2025-2026" selected>2025-2026</option>
-                            <option value="2026-2027">2026-2027</option>
+                        <select name="SCHOOL_YEAR" class="form-control" style="color: #000;">
+                            <option value="2025-2026" selected style="color: #000;">2025-2026</option>
+                            <option value="2026-2027" style="color: #000;">2026-2027</option>
                         </select>
                     </div>
                 </div>
@@ -911,19 +958,28 @@ textarea.form-control {
                 <div class="form-row">
                     <div class="form-group">
                         <label><i class="fa fa-university"></i> School/College/University <span style="color:red;">*</span></span></label>
-                        <input type="text" name="SCHOOL" class="form-control" required placeholder="NAME OF SCHOOL">
+                        <!-- <input type="text" name="SCHOOL" class="form-control" required placeholder="NAME OF SCHOOL"> -->
+                        <select name="SCHOOL", class="form-control" required style="color: #000;">
+                            <option value="" style="color: #000;">SELECT SCHOOL</option>
+                            <option value="UNIVERSITY OF NORTHERN PHILIPPINES" style="color: #000;">UNIVERSITY OF NORTHERN PHILIPPINES</option>
+                            <option value="ILOCOS SUR COMMUNITY COLLEGE" style="color: #000;">ILOCOS SUR COMMUNITY COLLEGE</option>
+                            <option value="ILOCOS SUR POLYTECHNIC STATE COLLEGE/UNIVERSITY OF ILOCOS PHILIPPINES" style="color: #000;">ILOCOS SUR POLYTECHNIC STATE COLLEGE/UNIVERSITY OF ILOCOS PHILIPPINES</option>
+                            <option value="ST. PAUL COLLEGE OF ILOCOS SUR" style="color: #000;">ST. PAUL COLLEGE OF ILOCOS SUR</option>
+                            <option value="DIVINE WORLD COLLEGE OF VIGAN" style="color: #000;">DIVINE WORLD COLLEGE OF VIGAN</option>
+                            <option value="IMMACULATE CONCEPTION SCHOOL OF THEOLOGY" style="color: #000;">IMMACULATE CONCEPTION SCHOOL OF THEOLOGY</option>
+                        </select>
                     </div>
                     <div class="form-group">
                         <label><i class="fa fa-map-o"></i> District <span style="color:red;">*</span></span></label>
-                        <select name="DISTRICT" class="form-control" required>
-                            <option value="">SELECT DISTRICT</option>
-                            <option value="1st District">1ST DISTRICT</option>
-                            <option value="2nd District">2ND DISTRICT</option>
+                        <select name="DISTRICT" class="form-control" required style="color: #000;">
+                            <option value="" style="color: #000;">SELECT DISTRICT</option>
+                            <option value="1st District" style="color: #000;">1ST DISTRICT</option>
+                            <option value="2nd District" style="color: #000;">2ND DISTRICT</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label><i class="fa fa-map-pin"></i> Municipality <span style="color:red;">*</span></span></label>
-                        <select name="MUNICIPALITY" class="form-control" required>
+                        <select name="MUNICIPALITY" class="form-control" required onchange="" style="color: #000;">
                             <option value="">SELECT MUNICIPALITY</option>
                             <?php
                             $municipalities = $mydb->setQuery("SELECT * FROM tbl_municipalities WHERE IS_ACTIVE = 'Yes' ORDER BY MUNICIPALITY_NAME");
@@ -1001,14 +1057,14 @@ textarea.form-control {
                                 <td><strong>ELEMENTARY</strong></td>
                                 <td><input type="text" name="elem_school" class="form-control input-sm" placeholder="ELEMENTARY SCHOOL"></td>
                                 <td><input type="text" name="elem_address" class="form-control input-sm" placeholder="ADDRESS"></td>
-                                <td><input type="text" name="elem_year" class="form-control input-sm" placeholder="YYYY"></td>
+                                <td><input type="number" name="elem_year" class="form-control input-sm" placeholder="YYYY" min="1900" max="2100"></td>
                                 <td><input type="text" name="elem_honors" class="form-control input-sm" placeholder="HONORS"></td>
                             </tr>
                             <tr>
                                 <td><strong>SECONDARY</strong></td>
                                 <td><input type="text" name="sec_school" class="form-control input-sm" placeholder="HIGH SCHOOL"></td>
                                 <td><input type="text" name="sec_address" class="form-control input-sm" placeholder="ADDRESS"></td>
-                                <td><input type="text" name="sec_year" class="form-control input-sm" placeholder="YYYY"></td>
+                                <td><input type="number" name="sec_year" class="form-control input-sm" placeholder="YYYY" min="1900" max="2100"></td>
                                 <td><input type="text" name="sec_honors" class="form-control input-sm" placeholder="HONORS"></td>
                             </tr>
                         </tbody>
@@ -1044,13 +1100,13 @@ textarea.form-control {
                             <tr>
                                 <td><strong>Status</strong></td>
                                 <td>
-                                    <select name="father_status" class="form-control input-sm">
+                                    <select name="father_status" class="form-control input-sm" style="line-height: 15px;padding: 0px 12px;">
                                         <option value="Living">LIVING</option>
                                         <option value="Deceased">DECEASED</option>
                                     </select>
                                 </td>
                                 <td>
-                                    <select name="mother_status" class="form-control input-sm">
+                                    <select name="mother_status" class="form-control input-sm" style="line-height: 15px;padding: 0px 12px;">
                                         <option value="Living">LIVING</option>
                                         <option value="Deceased">DECEASED</option>
                                     </select>
@@ -1072,33 +1128,33 @@ textarea.form-control {
                             <tr>
                                 <td><strong>Highest Educational Attainment</strong></td>
                                 <td>
-                                    <select name="father_education" class="form-control input-sm">
-                                        <option value="">SELECT</option>
-                                        <option value="Elementary">ELEMENTARY</option>
-                                        <option value="High School">HIGH SCHOOL</option>
-                                        <option value="College">COLLEGE</option>
-                                        <option value="Post Graduate">POST GRADUATE</option>
-                                        <option value="Vocational">VOCATIONAL</option>
+                                    <select name="father_education" class="form-control input-sm" style="line-height: 15px;padding: 0px 12px;">
+                                        <option value="" style="color: #000;">SELECT</option>
+                                        <option value="Elementary" style="color: #000;">ELEMENTARY</option>
+                                        <option value="High School" style="color: #000;">HIGH SCHOOL</option>
+                                        <option value="College" style="color: #000;">COLLEGE</option>
+                                        <option value="Post Graduate" style="color: #000;">POST GRADUATE</option>
+                                        <option value="Vocational" style="color: #000;">VOCATIONAL</option>
                                     </select>
                                 </td>
                                 <td>
-                                    <select name="mother_education" class="form-control input-sm">
-                                        <option value="">SELECT</option>
-                                        <option value="Elementary">ELEMENTARY</option>
-                                        <option value="High School">HIGH SCHOOL</option>
-                                        <option value="College">COLLEGE</option>
-                                        <option value="Post Graduate">POST GRADUATE</option>
-                                        <option value="Vocational">VOCATIONAL</option>
+                                    <select name="mother_education" class="form-control input-sm" style="line-height: 15px;padding: 0px 12px;">
+                                        <option value="" style="color: #000;">SELECT</option>
+                                        <option value="Elementary" style="color: #000;">ELEMENTARY</option>
+                                        <option value="High School" style="color: #000;">HIGH SCHOOL</option>
+                                        <option value="College" style="color: #000;">COLLEGE</option>
+                                        <option value="Post Graduate" style="color: #000;">POST GRADUATE</option>
+                                        <option value="Vocational" style="color: #000;">VOCATIONAL</option>
                                     </select>
                                 </td>
                                 <td>
-                                    <select name="guardian_education" class="form-control input-sm">
-                                        <option value="">SELECT</option>
-                                        <option value="Elementary">ELEMENTARY</option>
-                                        <option value="High School">HIGH SCHOOL</option>
-                                        <option value="College">COLLEGE</option>
-                                        <option value="Post Graduate">POST GRADUATE</option>
-                                        <option value="Vocational">VOCATIONAL</option>
+                                    <select name="guardian_education" class="form-control input-sm" style="line-height: 15px;padding: 0px 12px;">
+                                        <option value="" style="color: #000;">SELECT</option>
+                                        <option value="Elementary" style="color: #000;">ELEMENTARY</option>
+                                        <option value="High School" style="color: #000;">HIGH SCHOOL</option>
+                                        <option value="College" style="color: #000;">COLLEGE</option>
+                                        <option value="Post Graduate" style="color: #000;">POST GRADUATE</option>
+                                        <option value="Vocational" style="color: #000;">VOCATIONAL</option>
                                     </select>
                                 </td>
                             </tr>
@@ -1154,7 +1210,7 @@ textarea.form-control {
         <!-- DOCUMENTARY REQUIREMENTS -->
         <div class="application-card">
             <div class="card-header" onclick="toggleSection(this)">
-                <h3><i class="fa fa-file-text-o"></i> DOCUMENTARY REQUIREMENTS</h3>
+                <h3><i class="fa fa-file-text-o"></i> DOCUMENTARY REQUIREMENTS CHECKLIST</h3>
                 <span class="toggle-icon"><i class="fa fa-chevron-down"></i></span>
             </div>
 
@@ -1183,7 +1239,6 @@ textarea.form-control {
 
                                             <span>
                                                 <strong><?php echo $req->REQUIREMENT_NAME; ?></strong>
-                                                <span class="requirement-badge required">REQUIRED</span>
                                             </span>
                                         </label>
                                     </div>
@@ -1194,7 +1249,7 @@ textarea.form-control {
 
                     <!-- OPTIONAL DOCUMENTS -->
                     <div class="requirements-category">
-                        <h4><i class="fa fa-money"></i> FINANCIAL DOCUMENTS</h4>
+                        <h4><i class="fa fa-money"></i> FINANCIAL DOCUMENTS (Optional)</h4>
 
                         <?php foreach ($requirements as $req): ?>
                             <?php if ($req->REQUIRED == 'No'): ?>
@@ -1207,7 +1262,6 @@ textarea.form-control {
 
                                             <span>
                                                 <strong><?php echo $req->REQUIREMENT_NAME; ?></strong>
-                                                <span class="requirement-badge optional">OPTIONAL</span>
                                             </span>
                                         </label>
                                     </div>
@@ -1223,26 +1277,26 @@ textarea.form-control {
                     <div class="col-md-6">
                         <div class="form-group">
                             <label><i class="fa fa-heart"></i> 4Ps Beneficiary?</label>
-                            <select name="IS_4PS_BENEFICIARY" class="form-control">
-                                <option value="No">NO</option>
-                                <option value="Yes">YES</option>
+                            <select name="IS_4PS_BENEFICIARY" class="form-control" style="color: #000;">
+                                <option value="No" style="color: #000;">NO</option>
+                                <option value="Yes" style="color: #000;">YES</option>
                             </select>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
                             <label><i class="fa fa-leaf"></i> Indigenous People (IP)?</label>
-                            <select name="IS_INDIGENOUS" class="form-control">
-                                <option value="No">NO</option>
-                                <option value="Yes">YES</option>
+                            <select name="IS_INDIGENOUS" class="form-control" style="color: #000;">
+                                <option value="No" style="color: #000;">NO</option>
+                                <option value="Yes" style="color: #000;">YES</option>
                             </select>
                         </div>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label><i class="fa fa-sticky-note"></i> Missing Requirements Notes</label>
-                    <textarea name="missing_notes" class="form-control" rows="2" placeholder="Note any missing requirements or additional comments"></textarea>
+                    <label><i class="fa fa-sticky-note"></i> Additional Comments</label>
+                    <textarea name="missing_notes" class="form-control" rows="2" placeholder="Note any additional comments regarding this applicant"></textarea>
                 </div>
 
                 <div class="warning-box" style="margin-top: 20px; padding: 15px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 8px;">
@@ -1268,6 +1322,44 @@ textarea.form-control {
 </div>
 
 <script>
+// Ilocos Sur Barangays Data (for dynamic dropdown)
+const ilocosSurData = {
+        "ALILEM": ["Alilem Daya (Poblacion)", "Amilongan", "Anaao", "Apang", "Apaya", "Batbato", "Daddaay", "Dalawa", "Kiat"],
+        "BANAYOYO": ["Bagbagotot", "Banbanaal", "Bisangol", "Cadanglaan", "Casilagan Norte", "Casilagan Sur", "Elefante", "Guardia", "Lintic", "Lopez", "Montero", "Naguimba", "Pila", "Poblacion"],
+        "BANTAY": ["Aggay", "An-annam", "Balaleng", "Banaoang", "Barangay 1 (Poblacion)", "Barangay 2 (Poblacion)", "Barangay 3 (Poblacion)", "Barangay 4 (Poblacion)", "Barangay 5 (Poblacion)", "Barangay 6 (Poblacion)", "Bulag", "Buquig", "Cabalanggan", "Cabaroan", "Cabusligan", "Capangdanan", "Guimod", "Lingsat", "Malingeb", "Mira", "Naguiddayan", "Ora", "Paing", "Puspus", "Quimmarayan", "Sagneb", "Sagpat", "San Isidro", "San Julian", "San Mariano (Sallacong)", "Sinabaan", "Taguiporo", "Taleb", "Tay-ac"],
+        "BURGOS": ["Ambugat", "Balugang", "Bangbangar", "Bessang", "Cabcaburao", "Cadacad", "Callitong", "Dayanki", "Dirdirig (Dirdirig-Paday)", "Lesseb", "Lubing", "Lucaban", "Luna", "Macaoayan", "Manaboc", "Mapanit", "Nagpanaoan", "Paduros", "Patac", "Poblacion Norte (Bato)", "Poblacion Sur (Masingit)", "Sabangan Pinggan", "Subadi Norte", "Subadi Sur", "Taliao"],
+        "CABUGAO": ["Alinaay", "Aragan", "Arnap", "Baclig (Poblacion)", "Bato", "Bonifacio (Poblacion)", "Bungro", "Cacadiran", "Caellayan", "Carusipan", "Catucdaan", "Cuancabal", "Cuantacla", "Daclapan", "Dardarat", "Lipit", "Margaay", "Nagsantaan", "Nagsincaoan", "Namruangan", "Pila", "Pug-os", "Quezon (Poblacion)", "Reppaac", "Rizal (Poblacion)", "Sabang", "Sagayaden", "Salapasap", "Salomague", "Sisim", "Turod", "Turod-Patac"],
+        "CANDON CITY": ["Allangigan Primero", "Allangigan Segundo", "Amguid", "Ayudante", "Bagani Camposanto", "Bagani Gabor", "Bagani Tocgo", "Bagani Ubbog", "Bagar", "Balingaoan", "Boburot", "Bugnay", "Calaoaan", "Calongbuyan", "Caterman", "Cubcubboot", "Darapidap", "Langlangca Primero", "Langlangca Segundo", "Oaig-Daya", "Palacapac", "Paras", "Parioc Primero", "Parioc Segundo", "Patpata Primero", "Patpata Segundo", "Paypayad", "Salvador Primero", "Salvador Segundo", "San Agustin", "San Andres", "San Antonio (Poblacion)", "San Isidro (Poblacion)", "San Jose (Poblacion)", "San Juan (Poblacion)", "San Nicolas", "San Pedro", "Santo Tomas", "Tablac", "Talogtog", "Tamurong Primero", "Tamurong Segundo", "Villarica"],
+        "CAOAYAN": ["Anonang Mayor", "Anonang Menor", "Baggoc", "Callaguip", "Caparacadan", "Don Alejandro Quirologico (Poblacion)", "Don Dimas Querubin (Poblacion)", "Don Lorenzo Querubin (Poblacion)", "Fuerte", "Manangat", "Naguilian", "Nansuagao", "Pandan", "Pantay-Quitiquit", "Pantay Tamurong", "Puro", "Villamar"],
+        "CERVANTES": ["Aluling", "Comillas North", "Comillas South", "Concepcion (Poblacion)", "Dinwede East", "Dinwede West", "Libang", "Malaya", "Pilipil", "Remedios", "Rosario (Poblacion)", "San Juan", "San Luis"],
+        "GALIMUYOD": ["Abaya", "Bidbiday", "Bitong", "Borobor", "Calimugtong", "Calongbuyan", "Calumbaya", "Daldagan", "Kilang", "Matanubong", "Mckinley", "Nagsingcaoan", "Oaig-Daya", "Pagangpang", "Patac", "Poblacion", "Rubio", "Sabangan-Bato", "Sacaang", "San Vicente", "Sapang"],
+        "GREGORIO DEL PILAR": ["Alfonso (Tangaoan)", "Bussot", "Concepcion", "Dapdappig", "Matue-Butarag", "Poblacion Norte", "Poblacion Sur"],
+        "LIDLIDDA": ["Banucal", "Bequi-Walin", "Bugui", "Calungbuyan", "Carcarabasa", "Labut", "Poblacion Norte", "Poblacion Sur", "San Vicente", "Suysuyan", "Tay-ac"],
+        "MAGSINGAL": ["Alangan", "Bacar", "Barbarit", "Bungro", "Cabaroan", "Cadanglaan", "Caraisan", "Dacutan", "Labut", "Maas-asin", "Macatcatud", "Manzante", "Maratudo", "Miramar", "Namalpalan", "Napo", "Pagsanaan Norte", "Pagsanaan Sur", "Panay Norte", "Panay Sur", "Patong", "Puro", "San Basilio (Poblacion)", "San Clemente (Poblacion)", "San Julian (Poblacion)", "San Lucas (Poblacion)", "San Ramon (Poblacion)", "San Vicente (Poblacion)", "Santa Monica", "Sarsaracat"],
+        "NAGBUKEL": ["Balaweg", "Bandril", "Bantugo", "Cadacad", "Casilagan", "Casocos", "Lapting", "Mapisi", "Mission", "Poblacion East", "Poblacion West", "Taleb"],
+        "NARVACAN": ["Abuor", "Ambulogan", "Aquib", "Banglayan", "Bantay Abot", "Bulanos", "Cadacad", "Cagayungan", "Camarao", "Casilagan", "Codoog", "Dasay", "Dinalaoan", "Estancia", "Lanipao", "Lungog", "Margaay", "Marozo", "Naguneg", "Orence", "Pantoc", "Paratong", "Parparia", "Quinarayan", "Rivadavia", "San Antonio", "San Jose (Poblacion)", "San Pablo", "San Pedro", "Santa Lucia (Poblacion)", "Sarmingan", "Sucoc", "Sulvec", "Turod"],
+        "QUIRINO": ["Banoen", "Cayus", "Lamag (Tubtuba)", "Legleg (Poblacion)", "Malideg", "Namitpit", "Patiacan", "Patungcaleo (Lamag)", "Suagayan"],
+        "SALCEDO": ["Atabay", "Balidbid", "Baluarte", "Baybayading", "Boguibog", "Bulala-Leguey", "Calangcuasan", "Culiong", "Dinaratan", "Kaliwakiw", "Kinmarin", "Lucbuban", "Madarang", "Maligcong", "Pias", "Poblacion Norte", "Poblacion Sur", "San Gaspar", "San Tiburcio", "Ubbog"],
+        "SAN EMILIO": ["Cabaroan (Poblacion)", "Kalumsing", "Lancuas", "Matibuey", "Paltoc", "San Miliano", "Sibsibbu", "Tiagan"],
+        "SAN ESTEBAN": ["Ansad", "Apatot", "Bateria", "Cabaroan", "Cappa-cappa", "Poblacion", "San Nicolas", "San Pablo", "San Rafael", "Villa Quirino"],
+        "SAN ILDEFONSO": ["Arnap", "Bahet", "Belen", "Bungro", "Busiing Norte", "Busiing Sur", "Dongalo", "Gongogong", "Iboy", "Kinamantirisan", "Otol-Patac", "Poblacion East", "Poblacion West", "Sagneb", "Sagsagat"],
+        "SAN JUAN": ["Asilang", "Barbar", "Bacsil", "Baliw", "Bannuar (Poblacion)", "Cabanglotan", "Cacandongan", "Camanggaan", "Camindoroan", "Caronoan", "Darao", "Dardarat", "Guimod Norte", "Guimod Sur", "Immayos Norte", "Immayos Sur", "Labnig", "Lapting", "Lira (Poblacion)", "Malamin", "Muraya", "Nagsabaran", "Nagsupotan", "Pandayan (Poblacion)", "Refaro", "Resurreccion (Poblacion)", "Sabangan", "San Isidro", "Saoang", "Solotsolot", "Sunggiam", "Surngit"],
+        "SAN VICENTE": ["Bantaoay", "Bayubay Norte", "Bayubay Sur", "Lubong", "Poblacion", "Pudoc", "San Sebastian"],
+        "SANTA": ["Ampandula", "Banaoang", "Basug", "Bucalag", "Cabangaran", "Calungboyan", "Casiber", "Dammay", "Labut Norte", "Labut Sur", "Mabilbila Norte", "Mabilbila Sur", "Magsaysay District (Poblacion)", "Manueva", "Marcos (Poblacion)", "Nagpanaoan", "Namalangan", "Oribi", "Pasungol", "Quezon (Poblacion)", "Quirino (Poblacion)", "Rancho", "Rizal", "Sacuyya Norte", "Sacuyya Sur", "Tabucolan"],
+        "SANTA CATALINA": ["Cabaroan", "Cabittaogan", "Cabuloan", "Pangada", "Paratong", "Poblacion", "Sinabaan", "Subec", "Tamorong"],
+        "SANTA CRUZ": ["Amarao", "Babayoan", "Bacsayan", "Banay", "Bayugao Este", "Bayugao Oeste", "Besalan", "Bugbuga", "Calaoaan", "Camanggaan", "Casilagan", "Coscosnong", "Daligan", "Dili", "Gabor Norte", "Gabor Sur", "Guimod", "Lalong", "Lantag", "Las-ud", "Mambog", "Mantanas", "Nagtengnga", "Padaoil", "Paratong", "Pattiqui", "Pidpid", "Pilar", "Pinipin", "Poblacion Este", "Poblacion North", "Poblacion Sur", "Poblacion Weste", "Quinfermin", "Quinsoriano", "Sagat", "San Antonio", "San Jose", "San Pedro", "Saoat", "Sevilla", "Sidaoen", "Suyo", "Tampugo", "Turod", "Villa Garcia", "Villa Hermosa", "Villa Laurencia"],
+        "SANTA LUCIA": ["Alincaoeg", "Angkileng", "Arangin", "Ayusan (Poblacion)", "Banbanaba", "Bani", "Bao-as", "Barangobong (Poblacion)", "Buliclic", "Burgos (Poblacion)", "Cabaritan", "Catayagan", "Conconig East", "Conconig West", "Damacuag", "Lubong", "Nagrebcan", "Nagtablaan", "Namin-amin", "Nangalisan", "Palali Norte", "Palali Sur", "Paoc Norte", "Paoc Sur", "Paratong", "Pila East", "Pila West", "Poblacion", "Quinabalayangan", "Ronda", "Sabuanan", "San Juan", "San Pedro", "Sapang", "Suagayan", "Vical"],
+        "SANTA MARIA": ["Ag-agrao", "Ampuagan", "Baballasioan", "Baliw Daya", "Baliw Laud", "Bia-o", "Butir", "Cabaroan", "Casitan", "Danuman East", "Danuman West", "Dunglayan", "Gusing", "Langaoan", "Laslasong Norte", "Laslasong Sur", "Laslasong West", "Lingsat", "Lubong", "Maynganay Norte", "Maynganay Sur", "Nagsayaoan", "Nagtupacan", "Nalvo", "Pacang", "Penned", "Poblacion Norte", "Poblacion Sur", "Silag", "Sumagui", "Suso", "Tangaoan", "Tinaan"],
+        "SANTIAGO": ["Al-aludig", "Ambucao", "Baybayabas", "Bigbiga", "Bulbulala", "Busel-busel", "Butol", "Caburao", "Dan-ar", "Gabao", "Guinabang", "Imus", "Lang-ayan", "Mambug", "Nalasin", "Olo-olo Norte", "Olo-olo Sur", "Poblacion Norte", "Poblacion Sur", "Sabangan", "Salincub", "San Jose (Baraoas)", "San Roque", "Ubbog"],
+        "SANTO DOMINGO": ["Binalayangan", "Binongan", "Borobor", "Cabaritan", "Cabigbigaan", "Calautit", "Calay-ab", "Camestizoan", "Casili", "Flora", "Lagatit", "Laoingen", "Lussoc", "Nagbettedan", "Naglaoa-an", "Nalasin", "Nambaran", "Nanerman", "Napo", "Padu Chico", "Padu Grande", "Paguraper", "Panay", "Pangpangdan", "Parada", "Paras", "Poblacion", "Puerta Real", "Pussuac", "Quimmarayan", "San Pablo", "Santa Cruz", "Santo Tomas", "Sived", "Suksukit", "Vacunero"],
+        "SIGAY": ["Abaccan", "Mabileg", "Matallucod", "Poblacion (Madayaw)", "San Elias", "San Ramon", "Santo Rosario"],
+        "SINAIT": ["Aguing", "Baliw", "Ballaigui (Poblacion)", "Baracbac", "Battog", "Binacud", "Cabangtalan", "Cabarambanan", "Cabulalaan", "Cadanglaan", "Calanutian", "Calingayan", "Curtin", "Dadalaquiten Norte", "Dadalaquiten Sur", "Dean Leopoldo Yabes (Pug-os)", "Duyayyat", "Jordan", "Katipunan", "Macabiag (Poblacion)", "Magsaysay", "Marnay", "Masadag", "Nagbalioartian", "Nagcullooban", "Nagongburan", "Namnama (Poblacion)", "Pacis", "Paratong", "Poblacion", "Purag", "Quibit-quibit", "Quimmallogong", "Rang-ay (Poblacion)", "Ricudo", "Sabangan (Marcos)", "Sallacapo", "Santa Cruz", "Sapriana", "Tapao", "Teppeng", "Tubigay", "Ubbog", "Zapat"],
+        "SUGPON": ["Balbalayang (Poblacion)", "Banga", "Caoayan", "Danac", "Licungan (Cullang)", "Pangotan"],
+        "SUYO": ["Baringcucurong", "Cabugao", "Man-atong", "Patoc-ao", "Poblacion (Kimpusa)", "Suyo Proper", "Urzadan", "Uso"],
+        "TAGUDIN": ["Ag-aguman", "Ambalayat", "Baracbac", "Baritao", "Bario-an", "Becques", "Bimmanga", "Bio", "Bitalag", "Borono", "Bucao East", "Bucao West", "Cabaroan", "Cabugbugan", "Cabulanglangan", "Dacutan", "Dardarat", "Del Pilar (Poblacion)", "Farola", "Gabur", "Garitan", "Jardin", "Lacong", "Lantag", "Las-ud", "Libtong", "Lubnac", "Magsaysay (Poblacion)", "Malacañang", "Pacac", "Pallogan", "Poblacion", "Pudoc East", "Pudoc West", "Pula", "Quirino (Poblacion)", "Ranget", "Rizal (Poblacion)", "Salvacion", "San Miguel", "Sawat", "Tallaoen", "Tampugo", "Tarangotong"],
+        "VIGAN CITY": ["Ayusan Norte", "Ayusan Sur", "Barangay I (Poblacion)", "Barangay II - Amianance (Poblacion)", "Barangay III (Poblacion)", "Barangay IV - Solid West (Poblacion)", "Barangay IX - Cuta (Poblacion)", "Barangay V - Pagpartian (Poblacion)", "Barangay VI - Pagpandayan (Poblacion)", "Barangay VII - Pagburnayan (Poblacion)", "Barangay VIII - Cabasaan/Santa Elena (Poblacion)", "Barraca", "Beddeng Daya", "Beddeng Laud", "Bongtolan", "Bulala", "Cabalangegan", "Cabaroan Daya", "Cabaroan Laud", "Camangaan", "Capangpangan", "Mindoro", "Nagsangalan", "Pantay Daya", "Pantay Fatima", "Pantay Laud", "Paoa", "Paratong", "Pong-ol", "Purok-a-bassit", "Purok-a-dackel", "Raois", "Rugsuanan", "San Jose", "San Julian Norte", "San Julian Sur", "San Pedro", "Tamag"]
+    };
+
 // Toggle sections
 function toggleSection(header) {
     var card = header.closest('.application-card');
@@ -1284,6 +1376,24 @@ function toggleSection(header) {
         header.classList.add('collapsed');
     }
 }
+
+// Populate barangays based on selected municipality
+function populateBarangays(munValue, barangayId) {
+    var barangaySelect = document.getElementById(barangayId);
+    barangaySelect.innerHTML = '<option value="">SELECT BARANGAY</option>';
+    console.log('Selected Municipality:', munValue);
+    
+    if (ilocosSurData[munValue]) {
+        ilocosSurData[munValue].forEach(function(barangay) {
+            var option = document.createElement('option');
+            option.value = barangay.toUpperCase();
+            option.textContent = barangay.toUpperCase();
+            barangaySelect.appendChild(option);
+        });
+    }
+
+}
+
 
 // Calculate age from birthdate
 function calculateAge(input) {
@@ -1313,7 +1423,7 @@ function generateSiblingFields() {
             html += '<tr>';
             html += '<td><input type="text" name="sibling_name_' + i + '" class="form-control input-sm" placeholder="FULL NAME"></td>';
             html += '<td><input type="number" name="sibling_age_' + i + '" class="form-control input-sm" placeholder="AGE"></td>';
-            html += '<td><input type="text" name="sibling_education_' + i + '" class="form-control input-sm" placeholder="EDUCATION"></td>';
+            html += '<td><select name="sibling_education_' + i + '" class="form-control input-sm" style="line-height: 15px;padding: 0px 12px;"><option value="" style="color: #000;">SELECT</option><option value="Elementary" style="color: #000;">ELEMENTARY</option><option value="High School" style="color: #000;">HIGH SCHOOL</option><option value="College" style="color: #000;">COLLEGE</option><option value="Post Graduate" style="color: #000;">POST GRADUATE</option><option value="Vocational" style="color: #000;">VOCATIONAL</option></select></td>';
             html += '</tr>';
         }
         
@@ -1406,5 +1516,48 @@ document.querySelector('input[name="LRN"]').addEventListener('input', function()
 // Smooth scroll to top on submit
 document.getElementById('applicationForm').addEventListener('submit', function() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+// Change requirement item color when checkbox is checked
+document.addEventListener('DOMContentLoaded', function() {
+    // Function to check if all checkboxes in a category are checked
+    function checkCategoryCompletion() {
+        // Check required category
+        var requiredCategory = document.querySelector('.required-category');
+        if (requiredCategory) {
+            var requiredCheckboxes = requiredCategory.querySelectorAll('input[type="checkbox"]');
+            var allRequiredChecked = Array.from(requiredCheckboxes).every(cb => cb.checked);
+            if (allRequiredChecked) {
+                requiredCategory.classList.add('completed');
+            } else {
+                requiredCategory.classList.remove('completed');
+            }
+        }
+
+        // Check optional category
+        var optionalCategory = document.querySelector('.requirements-category:not(.required-category)');
+        if (optionalCategory) {
+            var optionalCheckboxes = optionalCategory.querySelectorAll('input[type="checkbox"]');
+            var allOptionalChecked = Array.from(optionalCheckboxes).every(cb => cb.checked);
+            if (allOptionalChecked) {
+                optionalCategory.classList.add('completed');
+            } else {
+                optionalCategory.classList.remove('completed');
+            }
+        }
+    }
+
+    document.querySelectorAll('input[type="checkbox"][name="requirements[]"]').forEach(function(checkbox) {
+        checkbox.addEventListener('change', function() {
+            var item = this.closest('.requirement-item');
+            if (this.checked) {
+                item.classList.add('checked');
+            } else {
+                item.classList.remove('checked');
+            }
+            // Check category completion after each change
+            checkCategoryCompletion();
+        });
+    });
 });
 </script>

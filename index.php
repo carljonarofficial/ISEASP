@@ -525,8 +525,8 @@ require_once("include/initialize.php");
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg">
         <div class="container">
-            <a class="navbar-brand" href="#">
-                <i class="fas fa-graduation-cap"></i>
+            <a class="navbar-brand logo" href="#">
+                <img src="uploads/iseasp_logo.png" alt="ISEASP Logo" width="40" height="40" class="d-inline-block align-text-top">
                 ISEASP
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -572,12 +572,12 @@ require_once("include/initialize.php");
                     <!-- Status Check Card -->
                     <div class="status-card">
                         <h3><i class="fas fa-search"></i> Check Your Status</h3>
-                        <p>Enter your 12-digit LRN (Learner Reference Number)</p>
+                        <p>Enter your 12-digit Learner Reference Number (LRN) for Incoming 1st Year College Students or your ID Number for Current College Students.</p>
                         
                         <div class="lrn-input-group">
                             <i class="fas fa-id-card"></i>
                             <input type="text" class="lrn-input" id="lrnInput" 
-                                   placeholder="Enter 12-digit LRN" maxlength="12" 
+                                   placeholder="Enter 12-digit LRN or ID Number" maxlength="12" 
                                    pattern="[0-9]{12}" inputmode="numeric">
                         </div>
                         

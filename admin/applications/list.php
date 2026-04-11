@@ -61,7 +61,15 @@ $school_year = isset($_GET['school_year']) ? $_GET['school_year'] : '';
 .stage-scholar { background: #20c997; color: white; }
 </style>
 
-<div class="row no-print" style="margin-bottom: 15px;">
+<div class="row no-print">
+    <div class="col-lg-12" style="margin-bottom: 15px;">
+        <a href="index.php?view=add" class="btn btn-primary" style="background-color: #27ae60; border-color: #229954;">
+            <i class="fa fa-plus"></i> New Applicant
+        </a>
+    </div>
+</div>
+
+<div class="row no-print">
     <div class="col-lg-12">
         <div class="panel panel-default">
             <div class="panel-heading" style="background-color: #27ae60; color: white; border-color: #229954;">
@@ -70,21 +78,6 @@ $school_year = isset($_GET['school_year']) ? $_GET['school_year'] : '';
             <div class="panel-body">
                 <form method="GET" action="index.php" class="form-inline">
                     <input type="hidden" name="view" value="list">
-                    
-                    <div class="form-group" style="margin-right: 10px;">
-                        <label>Stage:</label>
-                        <select name="stage" class="form-control input-sm">
-                            <option value="">All Stages</option>
-                            <option value="new" <?php echo ($stage == 'new') ? 'selected' : ''; ?>>New Applicant</option>
-                            <option value="requirements" <?php echo ($stage == 'requirements') ? 'selected' : ''; ?>>Requirements Check</option>
-                            <option value="exam_slip" <?php echo ($stage == 'exam_slip') ? 'selected' : ''; ?>>Exam Slip Generated</option>
-                            <option value="exam" <?php echo ($stage == 'exam') ? 'selected' : ''; ?>>For Examination</option>
-                            <option value="evaluation" <?php echo ($stage == 'evaluation') ? 'selected' : ''; ?>>For Evaluation</option>
-                            <option value="interview" <?php echo ($stage == 'interview') ? 'selected' : ''; ?>>For Interview</option>
-                            <option value="qualified" <?php echo ($stage == 'qualified') ? 'selected' : ''; ?>>Qualified</option>
-                            <option value="scholar" <?php echo ($stage == 'scholar') ? 'selected' : ''; ?>>Scholar</option>
-                        </select>
-                    </div>
                     
                     <div class="form-group" style="margin-right: 10px;">
                         <label>School Year:</label>
@@ -133,13 +126,101 @@ $school_year = isset($_GET['school_year']) ? $_GET['school_year'] : '';
     </div>
 </div>
 
+<!-- STATUS TABS -->
 <div class="row no-print">
-    <div class="col-lg-12" style="margin-bottom: 15px;">
-        <a href="index.php?view=add" class="btn btn-primary" style="background-color: #27ae60; border-color: #229954;">
-            <i class="fa fa-plus"></i> New Applicant
-        </a>
+    <div class="col-lg-12">
+        <ul class="nav nav-tabs applicant-status-tabs" role="tablist">
+            <li role="presentation" class="<?php echo ($stage == '' || $stage == 'new') ? 'active' : ''; ?>">
+                <a href="index.php?stage=new" class="tab-link">
+                    <i class="fa fa-user-plus"></i> New Applicants
+                </a>
+            </li>
+            <li role="presentation" class="<?php echo ($stage == 'requirements') ? 'active' : ''; ?>">
+                <a href="index.php?stage=requirements" class="tab-link">
+                    <i class="fa fa-file-text"></i> Missing Requirements
+                </a>
+            </li>
+            <li role="presentation" class="<?php echo ($stage == 'exam_slip') ? 'active' : ''; ?>">
+                <a href="index.php?stage=exam_slip" class="tab-link">
+                    <i class="fa fa-ticket"></i> Exam Slip
+                </a>
+            </li>
+            <li role="presentation" class="<?php echo ($stage == 'exam') ? 'active' : ''; ?>">
+                <a href="index.php?stage=exam" class="tab-link">
+                    <i class="fa fa-pencil-square-o"></i> Exam Results
+                </a>
+            </li>
+            <li role="presentation" class="<?php echo ($stage == 'evaluation') ? 'active' : ''; ?>">
+                <a href="index.php?stage=evaluation" class="tab-link">
+                    <i class="fa fa-check-square"></i> For Evaluation
+                </a>
+            </li>
+            <li role="presentation" class="<?php echo ($stage == 'interview') ? 'active' : ''; ?>">
+                <a href="index.php?stage=interview" class="tab-link">
+                    <i class="fa fa-microphone"></i> For Interview
+                </a>
+            </li>
+            <li role="presentation" class="<?php echo ($stage == 'qualified') ? 'active' : ''; ?>">
+                <a href="index.php?stage=qualified" class="tab-link">
+                    <i class="fa fa-check-circle"></i> Qualified
+                </a>
+            </li>
+            <li role="presentation" class="<?php echo ($stage == 'scholar') ? 'active' : ''; ?>">
+                <a href="index.php?stage=scholar" class="tab-link">
+                    <i class="fa fa-graduation-cap"></i> Scholars
+                </a>
+            </li>
+        </ul>
     </div>
 </div>
+
+<style>
+.applicant-status-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.applicant-status-tabs li {
+    margin: 0;
+    padding: 0;
+}
+
+.applicant-status-tabs .tab-link {
+    display: inline-block;
+    padding: 10px 15px;
+    background-color: #f8f9fa;
+    color: #495057;
+    text-decoration: none;
+    border: 1px solid #dee2e6;
+    border-right: none;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    font-size: 13px;
+}
+
+.applicant-status-tabs li:last-child .tab-link {
+    border-right: 1px solid #dee2e6;
+}
+
+.applicant-status-tabs .tab-link:hover {
+    background-color: #e9ecef;
+    color: #212529;
+}
+
+.applicant-status-tabs li.active .tab-link {
+    background-color: #27ae60;
+    color: white;
+    border-color: #1e8449;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.applicant-status-tabs i {
+    margin-right: 5px;
+}
+</style>
 
 <form action="controller.php?action=delete" method="POST">  
     <div id="print-section">
@@ -148,13 +229,12 @@ $school_year = isset($_GET['school_year']) ? $_GET['school_year'] : '';
                 <thead>
                     <tr>
                         <th width="3%" class="no-print" style="text-align: center;"><input type="checkbox" id="chkAll"></th>
-                        <th>LRN</th>
+                        <th>LRN or ID No.</th>
                         <th>Full Name</th>
                         <th>Municipality</th>
                         <th>School</th>
                         <th>Course</th>
                         <th>Year</th>
-                        <th>Stage</th>
                         <th>Exam Status</th>
                         <th width="18%" class="text-center no-print">Actions</th>
                     </tr>	
@@ -268,11 +348,16 @@ $school_year = isset($_GET['school_year']) ? $_GET['school_year'] : '';
                         $stageText = getStageText($a);
                         
                         $examStatus = isset($a->EXAM_STATUS) ? $a->EXAM_STATUS : 'Pending';
-                        $examColor = match($examStatus) {
-                            'Passed' => 'label-success',
-                            'Failed' => 'label-danger',
-                            default => 'label-default'
-                        };
+                        switch($examStatus) {
+                            case 'Passed':
+                                $examColor = 'label-success';
+                                break;
+                            case 'Failed':
+                                $examColor = 'label-danger';
+                                break;
+                            default:
+                                $examColor = 'label-default';
+                        }
                         
                         $verified_req = isset($a->VERIFIED_REQ) ? $a->VERIFIED_REQ : 0;
                         $total_req = isset($a->TOTAL_REQ) ? $a->TOTAL_REQ : 13;
@@ -298,7 +383,6 @@ $school_year = isset($_GET['school_year']) ? $_GET['school_year'] : '';
                         <td><?= htmlspecialchars($a->SCHOOL ?? 'N/A') ?></td>
                         <td><?= htmlspecialchars($a->COURSE ?? 'N/A') ?></td>
                         <td><?= htmlspecialchars($a->YEARLEVEL ?? 'N/A') ?></td>
-                        <td><span class="stage-badge <?= $stageClass ?> status-badge"><?= $stageText ?></span></td>
                         <td><span class="label <?= $examColor ?> status-badge"><?= $examStatus ?></span></td>
                         <td class="text-center no-print" onclick="event.cancelBubble=true; event.stopPropagation();">
                             <div class="action-buttons">

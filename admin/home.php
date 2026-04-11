@@ -130,7 +130,7 @@ $current_sy = '2025-2026';
         </div>
 
         <div class="col-lg-3 col-xs-6">
-            <div class="small-box bg-green">
+            <div class="small-box bg-yellow">
                 <div class="inner">
                     <h3><?php echo $pending_count; ?></h3>
                     <p>Pending Applications</p>
@@ -160,7 +160,7 @@ $current_sy = '2025-2026';
         </div>
 
         <div class="col-lg-3 col-xs-6">
-            <div class="small-box bg-red">
+            <div class="small-box bg-green">
                 <div class="inner">
                     <h3><?php echo $qualified_count; ?></h3>
                     <p>Qualified Applicants</p>

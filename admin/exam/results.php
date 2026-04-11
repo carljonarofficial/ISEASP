@@ -16,6 +16,21 @@ if (!isset($_SESSION['ADMIN_USERID'])) {
         <a href="index.php?view=schedule" class="btn btn-primary">
             <i class="fa fa-calendar"></i> View Schedule
         </a>
+        <a href="index.php?view=batch_add" class="btn btn-primary">
+            <i class="fa fa-plus"></i> Batch Add/Edit
+        </a>
+        <button type="button" class="btn btn-success" id="batchExportBtn" disabled>
+            <i class="fa fa-download"></i> Export Selected
+        </button>
+        <button type="button" class="btn btn-warning" id="batchPrintBtn" disabled>
+            <i class="fa fa-print"></i> Print Selected
+        </button>
+        <button type="button" class="btn btn-danger" id="batchDeleteBtn" disabled onclick="confirmBatchDelete()">
+            <i class="fa fa-trash"></i> Delete Selected
+        </button>
+        <button type="button" class="btn btn-info" id="selectAllBtn">
+            <i class="fa fa-check-square"></i> Select All
+        </button>
         <!-- <a href="#" onclick="window.print()" class="btn btn-default">
             <i class="fa fa-print"></i> Print Results
         </a> -->
@@ -142,6 +157,7 @@ if (!isset($_SESSION['ADMIN_USERID'])) {
     <table id="dash-table" class="table table-striped table-bordered table-hover" style="font-size:13px">
         <thead>
             <tr>
+                <th width="3%"><input type="checkbox" id="selectAllCheckbox"></th>
                 <th>Exam Date</th>
                 <th>Applicant Name</th>
                 <th>Municipality</th>
@@ -200,6 +216,7 @@ if (!isset($_SESSION['ADMIN_USERID'])) {
                     '<span class="label label-danger">FAILED</span>';
             ?>
             <tr>
+                <td><input type="checkbox" class="result-checkbox" value="<?= $r->EXAM_RESULT_ID ?>"></td>
                 <td><?= date('M d, Y', strtotime($r->EXAM_DATE)) ?></td>
                 <td><?= htmlspecialchars($r->LASTNAME . ', ' . $r->FIRSTNAME . ' ' . ($r->MIDDLENAME ?? '')) ?></td>
                 <td><?= htmlspecialchars($r->MUNICIPALITY ?? 'N/A') ?></td>
@@ -230,7 +247,7 @@ if (!isset($_SESSION['ADMIN_USERID'])) {
             
             <?php if (empty($results)): ?>
             <tr>
-                <td colspan="10" class="text-center">
+                <td colspan="11" class="text-center">
                     <div class="alert alert-info" style="margin: 20px;">
                         <i class="fa fa-info-circle"></i> No exam results found.
                     </div>
@@ -241,11 +258,99 @@ if (!isset($_SESSION['ADMIN_USERID'])) {
     </table>
 </div>
 
+<script src="<?php echo web_root;?>plugins/jQuery/jQuery-2.1.4.min.js"></script>
 <script>
 $(document).ready(function() {
     $('#dash-table').DataTable({
         "pageLength": 25,
-        "order": [[0, "desc"]]
+        "order": [[1, "desc"]], // Changed to column 1 since checkbox is now column 0
+        "columnDefs": [
+            { "orderable": false, "targets": 0 } // Make checkbox column non-sortable
+        ]
+    });
+    
+    // Handle select all checkbox
+    $('#selectAllCheckbox').on('change', function() {
+        $('.result-checkbox').prop('checked', $(this).prop('checked'));
+        updateBatchButtons();
+    });
+    
+    // Handle individual checkboxes
+    $(document).on('change', '.result-checkbox', function() {
+        updateBatchButtons();
+        
+        // Update select all checkbox state
+        var totalCheckboxes = $('.result-checkbox').length;
+        var checkedCheckboxes = $('.result-checkbox:checked').length;
+        $('#selectAllCheckbox').prop('checked', totalCheckboxes === checkedCheckboxes && totalCheckboxes > 0);
+    });
+    
+    // Select All button
+    $('#selectAllBtn').on('click', function() {
+        var allChecked = $('.result-checkbox:checked').length === $('.result-checkbox').length;
+        $('.result-checkbox').prop('checked', !allChecked);
+        $('#selectAllCheckbox').prop('checked', !allChecked);
+        updateBatchButtons();
+    });
+    
+    // Batch export
+    $('#batchExportBtn').on('click', function() {
+        var selectedIds = getSelectedIds();
+        if (selectedIds.length > 0) {
+            var url = 'controller.php?action=batch_export&ids=' + selectedIds.join(',');
+            window.open(url, '_blank');
+        }
+    });
+    
+    // Batch print
+    $('#batchPrintBtn').on('click', function() {
+        var selectedIds = getSelectedIds();
+        if (selectedIds.length > 0) {
+            var url = 'controller.php?action=batch_print&ids=' + selectedIds.join(',');
+            window.open(url, '_blank');
+        }
     });
 });
+
+function getSelectedIds() {
+    var selectedIds = [];
+    $('.result-checkbox:checked').each(function() {
+        selectedIds.push($(this).val());
+    });
+    return selectedIds;
+}
+
+function updateBatchButtons() {
+    var selectedCount = $('.result-checkbox:checked').length;
+    $('#batchExportBtn, #batchPrintBtn, #batchDeleteBtn').prop('disabled', selectedCount === 0);
+    
+    // Update button text to show count
+    if (selectedCount > 0) {
+        $('#batchExportBtn').html('<i class="fa fa-download"></i> Export (' + selectedCount + ')');
+        $('#batchPrintBtn').html('<i class="fa fa-print"></i> Print (' + selectedCount + ')');
+        $('#batchDeleteBtn').html('<i class="fa fa-trash"></i> Delete (' + selectedCount + ')');
+    } else {
+        $('#batchExportBtn').html('<i class="fa fa-download"></i> Export Selected');
+        $('#batchPrintBtn').html('<i class="fa fa-print"></i> Print Selected');
+        $('#batchDeleteBtn').html('<i class="fa fa-trash"></i> Delete Selected');
+    }
+}
+
+function confirmBatchDelete() {
+    var selectedCount = $('.result-checkbox:checked').length;
+    if (selectedCount === 0) {
+        alert('Please select exam results to delete.');
+        return;
+    }
+    
+    if (confirm('Are you sure you want to delete ' + selectedCount + ' exam result(s)? This action cannot be undone.')) {
+        var selectedIds = getSelectedIds();
+        var form = $('<form action="controller.php?action=batch_delete" method="POST"></form>');
+        for (var i = 0; i < selectedIds.length; i++) {
+            form.append('<input type="hidden" name="ids[]" value="' + selectedIds[i] + '">');
+        }
+        $('body').append(form);
+        form.submit();
+    }
+}
 </script>

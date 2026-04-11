@@ -321,7 +321,7 @@ if(isset($_SESSION['ADMIN_USERID'])){
     <div class="login-box">
         <div class="login-logo text-center">
             <a href="#" style="color: #28a745;">
-                <i style="color: #28a745;" class="fa fa-graduation-cap"></i> ISEASP
+                <img src="../uploads/iseasp_logo.png" alt="ISEASP Logo" width="40" height="40" class="d-inline-block align-text-top"> ISEASP
             </a>
             <p>Ilocos Sur Educational Assistance & Scholarship Program</p>
         </div>
