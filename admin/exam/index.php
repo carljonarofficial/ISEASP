@@ -33,6 +33,18 @@ switch ($view) {
         $content = 'batch_add.php';
         $subtitle = 'Batch Add/Edit Results';
         break;
+    case 'batch_reschedule':
+        $content = 'batch_reschedule.php';
+        $subtitle = 'Batch Reschedule Exams';
+        break;
+    case 'batch_print':
+        $content = 'batch_print.php';
+        $subtitle = 'Batch Exam Slip Print';
+        break;
+    case 'batch_cancel':
+        $content = 'batch_cancel.php';
+        $subtitle = 'Batch Cancel Exams';
+        break;
     default:
         $content = 'schedule.php';
         $subtitle = 'Exam Schedule';

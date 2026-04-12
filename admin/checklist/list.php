@@ -89,11 +89,35 @@ global $mydb;
                     
                     <div class="form-group" style="margin-right: 10px;">
                         <label>Municipality:</label>
-                        <input type="text" name="municipality" class="form-control input-sm" 
-                               value="<?= isset($_GET['municipality']) ? $_GET['municipality'] : '' ?>" 
-                               placeholder="Enter municipality">
+                        <select name="municipality" class="form-control input-sm">
+                            <option value="">All Municipalities</option>
+                            <?php
+                            $mydb->setQuery("SELECT DISTINCT MUNICIPALITY FROM tbl_applicants WHERE MUNICIPALITY IS NOT NULL AND MUNICIPALITY != '' ORDER BY MUNICIPALITY ASC");
+                            $mydb->executeQuery();
+                            $municipalities = $mydb->loadResultList();
+                            foreach ($municipalities as $m) {
+                                $selected = (isset($_GET['municipality']) && $_GET['municipality'] == $m->MUNICIPALITY) ? 'selected' : '';
+                                echo "<option value=\"{$m->MUNICIPALITY}\" $selected>{$m->MUNICIPALITY}</option>";
+                            }
+                            ?>
+                        </select>
                     </div>
-                    
+
+                    <div class="form-group" style="margin-right: 10px;">
+                        <label>School:</label>
+                        <select name="school" class="form-control input-sm">
+                            <option value="">All Schools</option>
+                            <?php
+                            $mydb->setQuery("SELECT DISTINCT SCHOOL FROM tbl_applicants WHERE SCHOOL IS NOT NULL AND SCHOOL != '' ORDER BY SCHOOL ASC");
+                            $mydb->executeQuery();
+                            $schools = $mydb->loadResultList();
+                            foreach ($schools as $s) {
+                                $selected = (isset($_GET['school']) && $_GET['school'] == $s->SCHOOL) ? 'selected' : '';
+                                echo "<option value=\"{$s->SCHOOL}\" $selected>{$s->SCHOOL}</option>";
+                            }
+                            ?>
+                        </select>
+                    </div>
                     <button type="submit" class="btn btn-primary btn-sm">
                         <i class="fa fa-search"></i> Apply Filter
                     </button>
@@ -138,6 +162,11 @@ global $mydb;
             if (isset($_GET['municipality']) && !empty($_GET['municipality'])) {
                 $municipality = trim($_GET['municipality']);
                 $where[] = "a.MUNICIPALITY LIKE '%$municipality%'";
+            }
+
+            if (isset($_GET['school']) && !empty($_GET['school'])) {
+                $school = trim($_GET['school']);
+                $where[] = "a.SCHOOL = '$school'";
             }
             
             $where_clause = !empty($where) ? "HAVING " . implode(" AND ", $where) : "";
@@ -214,11 +243,40 @@ global $mydb;
     </table>
 </div>
 
+<script src="<?= web_root ?>plugins/jQuery/jQuery-2.1.4.min.js"></script>
+<script src="<?= web_root ?>plugins/datatables/jquery.dataTables.min.js"></script>
+<script src="<?= web_root ?>plugins/datatables/dataTables.bootstrap.min.js"></script>
 <script>
-$(document).ready(function() {
+jQuery(document).ready(function($) {
     $('#dash-table').DataTable({
         "pageLength": 25,
-        "order": [[0, "asc"]]
+        "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
+        "pagingType": "full_numbers",
+        "searching": true,
+        "responsive": true,
+        "order": [[0, "asc"]],
+"columnDefs": [
+            { "orderable": false, "targets": 6 },
+            { 
+                "targets": "_all",
+                "defaultContent": "-"
+            }
+        ],
+        "language": {
+            "lengthMenu": "Show _MENU_ applicants per page",
+            "search": "Search applicants:",
+            "info": "Showing page _PAGE_ of _PAGES_ | _START_ to _END_ of _TOTAL_ applicants",
+            "infoEmpty": "No applicants available",
+            "infoFiltered": "(filtered from _MAX_ total)",
+            "zeroRecords": "No matching applicants found",
+            "emptyTable": "No applicant requirements data available",
+            "paginate": {
+                "first": "First",
+                "last": "Last",
+                "next": "Next", 
+                "previous": "Previous"
+            }
+        }
     });
 });
 </script>

@@ -86,8 +86,8 @@ $requirements = $mydb->loadResultList();
 <!-- Applicant Info Summary -->
 <div class="row" style="margin-bottom: 15px;">
     <div class="col-lg-12">
-        <div class="alert alert-info">
-            <strong>Applicant:</strong> <?= htmlspecialchars($applicant->LASTNAME . ', ' . $applicant->FIRSTNAME . ' ' . ($applicant->MIDDLENAME ?? '')) ?> | 
+        <div class="alert" style="background-color: #337ab7; color: #fff">
+            <!-- <strong>Applicant:</strong> <?= htmlspecialchars($applicant->LASTNAME . ', ' . $applicant->FIRSTNAME . ' ' . ($applicant->MIDDLENAME ?? '')) ?> |  -->
             <strong>School:</strong> <?= htmlspecialchars($applicant->SCHOOL) ?> | 
             <strong>Course:</strong> <?= htmlspecialchars($applicant->COURSE) ?> | 
             <strong>Municipality:</strong> <?= htmlspecialchars($applicant->MUNICIPALITY) ?>
@@ -131,7 +131,9 @@ $requirements = $mydb->loadResultList();
                                         $current_category = $req->CATEGORY;
                                 ?>
                                 <tr class="active">
-                                    <td colspan="6"><strong><?= $current_category ?></strong></td>
+                                    <td colspan="4"><strong><?= $current_category ?></strong></td>
+                                    <td class="text-center"><input type="checkbox" id="checkall_<?= $req->CATEGORY ?>" onchange="checkAllCategoryRequirements('<?= $req->CATEGORY ?>')"></td>
+                                    <td></td>
                                 </tr>
                                 <?php endif; ?>
                                 <tr>
@@ -155,7 +157,7 @@ $requirements = $mydb->loadResultList();
                                     </td>
                                     <td class="text-center">
                                         <input type="checkbox" name="requirements[<?= $req->REQUIREMENT_ID ?>][verified]" 
-                                               value="1" <?= $req->IS_VERIFIED ? 'checked' : '' ?>>
+                                               value="1" class="category_<?= $req->CATEGORY ?>" <?= $req->IS_VERIFIED ? 'checked' : '' ?>>
                                     </td>
                                     <td>
                                         <input type="text" class="form-control input-sm" 
@@ -183,6 +185,7 @@ $requirements = $mydb->loadResultList();
     </div>
 </div>
 
+<script src="<?php echo web_root; ?>plugins/jQuery/jQuery-2.1.4.min.js"></script>
 <script>
 // Auto-check verified when submitted is checked (optional)
 $('input[name$="[submitted]"]').change(function() {
@@ -193,4 +196,10 @@ $('input[name$="[submitted]"]').change(function() {
         }
     }
 });
+
+// Per requirement select/deselect all in category (optional)
+function checkAllCategoryRequirements(categoryName) {
+    var isChecked = $('#checkall_' + categoryName).is(':checked');
+    $(".category_" + categoryName).prop('checked', isChecked);
+}
 </script>

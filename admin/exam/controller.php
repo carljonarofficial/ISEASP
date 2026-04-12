@@ -28,6 +28,15 @@ switch ($action) {
     case 'batch_add_edit':
         doBatchAddEdit();
         break;
+    case 'batch_cancel_exams':
+        doBatchCancelExams();
+        break;
+    case 'batch_reschedule':
+        doBatchReschedule();
+        break;
+    case 'batch_summary_report':
+        doBatchSummaryReport();
+        break;
 }
 
 function doInsert() {
@@ -772,6 +781,335 @@ function doBatchAddEdit() {
     } else {
         message("No applicants selected or invalid data provided!", "error");
         redirect("index.php?view=batch_add");
+    }
+}
+
+function doBatchCancelExams() {
+    global $mydb;
+
+    if (isset($_POST['ids']) && is_array($_POST['ids']) && !empty($_POST['ids'])) {
+        $ids = $_POST['ids'];
+        $success_count = 0;
+        $error_count = 0;
+
+        foreach ($ids as $applicant_id) {
+            $applicant_id = intval($applicant_id);
+
+            // Update applicant status and clear exam details
+            $sql = "UPDATE tbl_applicants SET 
+                    EXAM_STATUS = 'Cancelled',
+                    EXAM_DATE = NULL,
+                    EXAM_TIME = NULL,
+                    EXAM_VENUE = NULL,
+                    EXAM_SLIP_GENERATED = NULL,
+                    EXAM_SLIP_NUMBER = NULL
+                    WHERE APPLICANTID = $applicant_id 
+                    AND EXAM_STATUS = 'Pending'";
+
+            $mydb->setQuery($sql);
+            if ($mydb->executeQuery()) {
+                // Log the cancellation
+                $log_sql = "INSERT INTO tbl_application_log
+                            (APPLICANTID, USERID, USERNAME, USER_ROLE, ACTION, ACTION_TYPE, DETAILS)
+                            SELECT
+                                $applicant_id,
+                                " . $_SESSION['ADMIN_USERID'] . ",
+                                USERNAME,
+                                ROLE,
+                                'Exam cancelled (batch)',
+                                'EXAM',
+                                'Exam schedule cancelled by administrator'
+                            FROM tblusers
+                            WHERE USERID = " . $_SESSION['ADMIN_USERID'];
+                $mydb->setQuery($log_sql);
+                $mydb->executeQuery();
+
+                $success_count++;
+            } else {
+                $error_count++;
+            }
+        }
+
+        if ($success_count > 0) {
+            message("Successfully cancelled $success_count exam(s)!" .
+                   ($error_count > 0 ? " $error_count cancellation(s) failed." : ""), "success");
+        } else {
+            message("No exams were cancelled. Please try again.", "error");
+        }
+
+        redirect("index.php?view=results");
+    } else {
+        message("No applicants selected for cancellation!", "error");
+        redirect("index.php?view=results");
+    }
+}
+
+function doBatchReschedule() {
+    global $mydb;
+
+    if (isset($_POST['applicant_ids']) && is_array($_POST['applicant_ids']) &&
+        !empty($_POST['applicant_ids']) && isset($_POST['new_exam_date']) &&
+        isset($_POST['new_exam_time']) && isset($_POST['new_exam_venue'])) {
+
+        $applicant_ids = $_POST['applicant_ids'];
+        $new_exam_date = $mydb->escape_value($_POST['new_exam_date']);
+        $new_exam_time = $mydb->escape_value($_POST['new_exam_time']);
+        $new_exam_venue = $mydb->escape_value($_POST['new_exam_venue']);
+
+        $success_count = 0;
+        $error_count = 0;
+
+        foreach ($applicant_ids as $applicant_id) {
+            $applicant_id = intval($applicant_id);
+
+            // Update exam schedule
+            $sql = "UPDATE tbl_applicants SET
+                    EXAM_DATE = '$new_exam_date',
+                    EXAM_TIME = '$new_exam_time',
+                    EXAM_VENUE = '$new_exam_venue'
+                    WHERE APPLICANTID = $applicant_id
+                    AND EXAM_STATUS = 'Pending'
+                    AND EXAM_SLIP_GENERATED IS NOT NULL";
+
+            $mydb->setQuery($sql);
+            if ($mydb->executeQuery()) {
+                // Log the reschedule action
+                $log_sql = "INSERT INTO tbl_application_log
+                            (APPLICANTID, USERID, USERNAME, USER_ROLE, ACTION, ACTION_TYPE, DETAILS)
+                            SELECT
+                                $applicant_id,
+                                " . $_SESSION['ADMIN_USERID'] . ",
+                                USERNAME,
+                                ROLE,
+                                'Exam rescheduled (batch)',
+                                'EXAM',
+                                CONCAT('Rescheduled to: $new_exam_date $new_exam_time at $new_exam_venue')
+                            FROM tblusers
+                            WHERE USERID = " . $_SESSION['ADMIN_USERID'];
+                $mydb->setQuery($log_sql);
+                $mydb->executeQuery();
+
+                $success_count++;
+            } else {
+                $error_count++;
+            }
+        }
+
+        if ($success_count > 0) {
+            message("Successfully rescheduled $success_count exam(s)!" .
+                   ($error_count > 0 ? " $error_count reschedule(s) failed." : ""), "success");
+        } else {
+            message("No exams were rescheduled. Please try again.", "error");
+        }
+
+        redirect("index.php?view=results");
+    } else {
+        message("No applicants selected or invalid schedule data provided!", "error");
+        redirect("index.php?view=batch_reschedule");
+    }
+}
+
+function doBatchSummaryReport() {
+    global $mydb;
+
+    if (isset($_GET['ids'])) {
+        $ids = array_map('intval', explode(',', $_GET['ids']));
+        $ids_str = implode(',', $ids);
+
+        // Get selected applicants with exam information
+        $sql = "
+            SELECT a.*
+            FROM tbl_applicants a
+            WHERE a.APPLICANTID IN ($ids_str)
+            AND a.EXAM_SLIP_GENERATED IS NOT NULL
+            ORDER BY a.EXAM_DATE ASC, a.EXAM_TIME ASC
+        ";
+
+        $mydb->setQuery($sql);
+        $mydb->executeQuery();
+        $applicants = $mydb->loadResultList();
+
+        // Generate HTML for printing
+        ?>
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Exam Schedule Summary Report</title>
+            <style>
+                * { margin: 0; padding: 0; box-sizing: border-box; }
+                body { 
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+                    margin: 20px; 
+                    background: #f5f5f5;
+                }
+                .container { 
+                    background: white; 
+                    padding: 30px; 
+                    border-radius: 5px;
+                    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+                }
+                .header { 
+                    text-align: center; 
+                    margin-bottom: 30px; 
+                    border-bottom: 3px solid #333; 
+                    padding-bottom: 15px; 
+                }
+                .header h1 { 
+                    color: #333; 
+                    font-size: 28px;
+                    margin-bottom: 5px;
+                }
+                .header p { 
+                    color: #666; 
+                    font-size: 14px;
+                }
+                .meta-info {
+                    display: flex;
+                    justify-content: space-between;
+                    margin-bottom: 20px;
+                    font-size: 12px;
+                    color: #666;
+                    padding: 10px;
+                    background: #f9f9f9;
+                    border-radius: 3px;
+                }
+                table { 
+                    width: 100%; 
+                    border-collapse: collapse; 
+                    margin-top: 20px;
+                }
+                th, td { 
+                    border: 1px solid #ddd; 
+                    padding: 12px; 
+                    text-align: left;
+                    font-size: 13px;
+                }
+                th { 
+                    background-color: #4CAF50; 
+                    color: white;
+                    font-weight: bold;
+                }
+                tr:nth-child(even) { 
+                    background-color: #f9f9f9; 
+                }
+                tr:hover { 
+                    background-color: #f0f0f0; 
+                }
+                .status-pending { color: #FF9800; font-weight: bold; }
+                .status-passed { color: #4CAF50; font-weight: bold; }
+                .status-failed { color: #f44336; font-weight: bold; }
+                .footer {
+                    margin-top: 30px;
+                    text-align: center;
+                    font-size: 12px;
+                    color: #999;
+                    border-top: 1px solid #ddd;
+                    padding-top: 15px;
+                }
+                .no-print { 
+                    text-align: center; 
+                    margin-top: 20px; 
+                    padding-top: 20px;
+                    border-top: 1px solid #ddd;
+                }
+                .no-print button {
+                    margin: 0 10px;
+                    padding: 10px 20px;
+                    font-size: 14px;
+                    cursor: pointer;
+                    border: none;
+                    border-radius: 3px;
+                    background: #4CAF50;
+                    color: white;
+                    transition: background 0.3s;
+                }
+                .no-print button:hover {
+                    background: #45a049;
+                }
+                .no-print button.close {
+                    background: #f44336;
+                }
+                .no-print button.close:hover {
+                    background: #da190b;
+                }
+                @media print { 
+                    .no-print { display: none; }
+                    body { margin: 0; background: white; }
+                    .container { box-shadow: none; }
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>Exam Schedule Summary Report</h1>
+                    <p>ISEASP - Batch Printing Report</p>
+                </div>
+
+                <div class="meta-info">
+                    <span><strong>Total Applicants:</strong> <?php echo count($applicants); ?></span>
+                    <span><strong>Generated on:</strong> <?php echo date('F d, Y \a\t H:i:s'); ?></span>
+                    <span><strong>Generated by:</strong> <?php echo htmlspecialchars($_SESSION['USERNAME'] ?? 'Admin'); ?></span>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th width="5%">#</th>
+                            <th>Exam Slip #</th>
+                            <th>Applicant Name</th>
+                            <th>Municipality</th>
+                            <th>School</th>
+                            <th>Course</th>
+                            <th>Exam Date</th>
+                            <th>Exam Time</th>
+                            <th>Venue</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php 
+                        $counter = 1;
+                        foreach ($applicants as $a): 
+                            $status_class = 'status-pending';
+                            if ($a->EXAM_STATUS == 'Passed') {
+                                $status_class = 'status-passed';
+                            } elseif ($a->EXAM_STATUS == 'Failed') {
+                                $status_class = 'status-failed';
+                            }
+                        ?>
+                            <tr>
+                                <td><?php echo $counter++; ?></td>
+                                <td><?php echo htmlspecialchars($a->EXAM_SLIP_NUMBER ?? 'N/A'); ?></td>
+                                <td><?php echo htmlspecialchars($a->LASTNAME . ', ' . $a->FIRSTNAME . ' ' . ($a->MIDDLENAME ?? '')); ?></td>
+                                <td><?php echo htmlspecialchars($a->MUNICIPALITY ?? 'N/A'); ?></td>
+                                <td><?php echo htmlspecialchars($a->SCHOOL ?? 'N/A'); ?></td>
+                                <td><?php echo htmlspecialchars($a->COURSE ?? 'N/A'); ?></td>
+                                <td><?php echo $a->EXAM_DATE ? date('M d, Y', strtotime($a->EXAM_DATE)) : 'N/A'; ?></td>
+                                <td><?php echo $a->EXAM_TIME ? date('h:i A', strtotime($a->EXAM_TIME)) : 'N/A'; ?></td>
+                                <td><?php echo htmlspecialchars($a->EXAM_VENUE ?? 'N/A'); ?></td>
+                                <td><span class="<?php echo $status_class; ?>"><?php echo htmlspecialchars($a->EXAM_STATUS); ?></span></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+
+                <div class="footer">
+                    <p>This is an official ISEASP Exam Schedule Summary Report</p>
+                </div>
+
+                <div class="no-print">
+                    <button onclick="window.print()"><i class="fa fa-print"></i> Print Report</button>
+                    <button class="close" onclick="window.close()"><i class="fa fa-times"></i> Close</button>
+                </div>
+            </div>
+        </body>
+        </html>
+        <?php
+        exit();
+    } else {
+        message("No applicants selected for report!", "error");
+        redirect("index.php?view=schedule");
     }
 }
 ?>

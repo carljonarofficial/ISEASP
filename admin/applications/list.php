@@ -3,7 +3,7 @@ if (!isset($_SESSION['ADMIN_USERID'])) {
     redirect(web_root . "admin/index.php");
 }
 
-$stage = isset($_GET['stage']) ? $_GET['stage'] : '';
+$stage = isset($_GET['stage']) ? $_GET['stage'] : 'all';
 $district = isset($_GET['district']) ? $_GET['district'] : '';
 $municipality = isset($_GET['municipality']) ? $_GET['municipality'] : '';
 $school_year = isset($_GET['school_year']) ? $_GET['school_year'] : '';
@@ -130,6 +130,11 @@ $school_year = isset($_GET['school_year']) ? $_GET['school_year'] : '';
 <div class="row no-print">
     <div class="col-lg-12">
         <ul class="nav nav-tabs applicant-status-tabs" role="tablist">
+            <li role="presentation" class="<?php echo ($stage == 'all') ? 'active' : ''; ?>">
+                <a href="index.php?stage=all" class="tab-link">
+                    <i class="fa fa-users"></i> All Applicants
+                </a>
+            </li>
             <li role="presentation" class="<?php echo ($stage == '' || $stage == 'new') ? 'active' : ''; ?>">
                 <a href="index.php?stage=new" class="tab-link">
                     <i class="fa fa-user-plus"></i> New Applicants
@@ -226,19 +231,20 @@ $school_year = isset($_GET['school_year']) ? $_GET['school_year'] : '';
     <div id="print-section">
         <div class="table-responsive">					
             <table id="dash-table" class="table table-striped table-bordered table-hover" style="font-size:13px; width:100%; border-collapse: collapse;">
-                <thead>
+<thead>
                     <tr>
                         <th width="3%" class="no-print" style="text-align: center;"><input type="checkbox" id="chkAll"></th>
-                        <th>LRN or ID No.</th>
-                        <th>Full Name</th>
+                        <th data-priority="1">LRN/ID</th>
+                        <th data-priority="1">Full Name</th>
                         <th>Municipality</th>
-                        <th>School</th>
-                        <th>Course</th>
-                        <th>Year</th>
-                        <th>Exam Status</th>
-                        <th width="18%" class="text-center no-print">Actions</th>
+                        <th data-priority="2">School</th>
+                        <th data-priority="3">Course</th>
+                        <th data-priority="3">Year</th>
+                        <th data-priority="2">Exam Status</th>
+                        <th data-priority="2">Status</th>
+                        <th width="18%" class="no-print" data-priority="10001">Actions</th>
                     </tr>	
-                </thead> 
+                </thead>
                 <?php
                 $where = array();
                 
@@ -258,7 +264,7 @@ $school_year = isset($_GET['school_year']) ? $_GET['school_year'] : '';
                         $where[] = "a.APPLICATION_TYPE = 'New Applicant'";
                         break;
                     case 'requirements':
-                        $where[] = "a.REQUIREMENT_STATUS = 'Incomplete' OR a.REQUIREMENT_STATUS IS NULL";
+                        $where[] = "(SELECT COUNT(*) FROM tbl_applicant_requirement_checklist WHERE APPLICANTID = a.APPLICANTID AND IS_VERIFIED = 1) < (SELECT COUNT(*) FROM tbl_requirement)";
                         $where[] = "a.STATUS NOT IN ('Qualified', 'Scholar')";
                         break;
                     case 'exam_slip':
@@ -281,6 +287,9 @@ $school_year = isset($_GET['school_year']) ? $_GET['school_year'] : '';
                     case 'scholar':
                         $where[] = "a.STATUS = 'Scholar'";
                         break;
+                    case 'all':
+                        // No additional filters for all applicants
+                        break;
                 }
                 
                 if(!empty($district)) {
@@ -298,7 +307,7 @@ $school_year = isset($_GET['school_year']) ? $_GET['school_year'] : '';
                         u.FULLNAME AS CREATED_BY,
                         (SELECT COUNT(*) FROM tbl_applicant_requirement_checklist 
                          WHERE APPLICANTID = a.APPLICANTID AND IS_VERIFIED = 1) AS VERIFIED_REQ,
-                        (SELECT COUNT(*) FROM tbl_requirement WHERE REQUIRED = 'Yes') AS TOTAL_REQ
+                        (SELECT COUNT(*) FROM tbl_requirement) AS TOTAL_REQ
                     FROM tbl_applicants a
                     LEFT JOIN tblusers u ON a.CREATED_BY = u.USERID
                     $where_clause
@@ -313,9 +322,23 @@ $school_year = isset($_GET['school_year']) ? $_GET['school_year'] : '';
                     if($applicant->STATUS == 'For Interview') return 'stage-interview';
                     if($applicant->EXAM_STATUS == 'Passed' && $applicant->STATUS == 'Pending') return 'stage-evaluation';
                     if(!empty($applicant->EXAM_SLIP_GENERATED) && $applicant->EXAM_STATUS == 'Pending') return 'stage-exam-slip';
-                    if(isset($applicant->REQUIREMENT_STATUS) && $applicant->REQUIREMENT_STATUS == 'Incomplete') return 'stage-requirements';
+                    $verified = isset($applicant->VERIFIED_REQ) ? $applicant->VERIFIED_REQ : 0;
+                    $total = isset($applicant->TOTAL_REQ) ? $applicant->TOTAL_REQ : 13;
+                    if($verified < $total) return 'stage-requirements';
                     if($applicant->EXAM_STATUS != 'Pending' && $applicant->EXAM_STATUS != '') return 'stage-exam';
                     return 'stage-new';
+                }
+                
+                function getStatusColor($status) {
+                    switch($status) {
+                        case 'Scholar': return 'success';
+                        case 'Qualified': return 'info';
+                        case 'For Interview': return 'warning';
+                        case 'Pending': return 'default';
+                        case 'Graduated': return 'primary';
+                        case 'Terminated': return 'danger';
+                        default: return 'default';
+                    }
                 }
                 
                 function getStageText($applicant) {
@@ -324,7 +347,9 @@ $school_year = isset($_GET['school_year']) ? $_GET['school_year'] : '';
                     if($applicant->STATUS == 'For Interview') return 'For Interview';
                     if($applicant->EXAM_STATUS == 'Passed' && $applicant->STATUS == 'Pending') return 'For Evaluation';
                     if(!empty($applicant->EXAM_SLIP_GENERATED) && $applicant->EXAM_STATUS == 'Pending') return 'Exam Slip';
-                    if(isset($applicant->REQUIREMENT_STATUS) && $applicant->REQUIREMENT_STATUS == 'Incomplete') return 'Missing Requirements';
+                    $verified = isset($applicant->VERIFIED_REQ) ? $applicant->VERIFIED_REQ : 0;
+                    $total = isset($applicant->TOTAL_REQ) ? $applicant->TOTAL_REQ : 13;
+                    if($verified < $total) return 'Missing Requirements';
                     if($applicant->EXAM_STATUS == 'Passed') return 'Passed Exam';
                     if($applicant->EXAM_STATUS == 'Failed') return 'Failed Exam';
                     if(!empty($applicant->EXAM_SLIP_GENERATED)) return 'Exam Slip Generated';
@@ -384,6 +409,7 @@ $school_year = isset($_GET['school_year']) ? $_GET['school_year'] : '';
                         <td><?= htmlspecialchars($a->COURSE ?? 'N/A') ?></td>
                         <td><?= htmlspecialchars($a->YEARLEVEL ?? 'N/A') ?></td>
                         <td><span class="label <?= $examColor ?> status-badge"><?= $examStatus ?></span></td>
+                        <td><span class="label label-<?= getStatusColor($a->STATUS) ?> status-badge"><?= $a->STATUS ?? 'Pending' ?></span></td>
                         <td class="text-center no-print" onclick="event.cancelBubble=true; event.stopPropagation();">
                             <div class="action-buttons">
                                 <a href="./index.php?view=view&id=<?= $a->APPLICANTID ?>" 
@@ -391,14 +417,14 @@ $school_year = isset($_GET['school_year']) ? $_GET['school_year'] : '';
                                     <i class="fa fa-eye"></i>
                                 </a>
                                 
-                                <?php if(empty($a->EXAM_SLIP_GENERATED) && $a->STATUS == 'Pending' && $a->REQUIREMENT_STATUS == 'Complete'): ?>
+                                <?php if(empty($a->EXAM_SLIP_GENERATED) && $a->STATUS == 'Pending' && $verified_req == $total_req): ?>
                                     <a href="./index.php?view=exam_slip&id=<?= $a->APPLICANTID ?>" 
                                        class="btn btn-warning btn-xs" title="Generate Exam Slip">
                                         <i class="fa fa-ticket"></i>
                                     </a>
                                 <?php endif; ?>
                                 
-                                <?php if(empty($a->EXAM_SLIP_GENERATED) && $a->STATUS == 'Pending' && $a->REQUIREMENT_STATUS != 'Complete'): ?>
+                                <?php if(empty($a->EXAM_SLIP_GENERATED) && $a->STATUS == 'Pending' && $verified_req != $total_req): ?>
                                     <a href="../checklist/index.php?view=view&id=<?= $a->APPLICANTID ?>" 
                                        class="btn btn-danger btn-xs" title="Missing Requirements">
                                         <i class="fa fa-exclamation-triangle"></i>
@@ -446,7 +472,7 @@ $school_year = isset($_GET['school_year']) ? $_GET['school_year'] : '';
                     
                     <?php if(!$has_applicants): ?>
                     <tr>
-                        <td colspan="11" class="text-center">
+                        <td colspan="10" class="text-center">
                             <div class="alert alert-info" style="margin: 20px;">
                                 <i class="fa fa-info-circle"></i> No applicants found.
                                 <a href="index.php?view=add" class="alert-link">Click here to add a new applicant</a>.
@@ -458,6 +484,13 @@ $school_year = isset($_GET['school_year']) ? $_GET['school_year'] : '';
             </table>
             
             <?php if($has_applicants): ?>
+            <div class="row no-print" id="selection-info" style="display: none; margin-top: 10px; padding: 0 15px;">
+                <div class="col-md-12">
+                    <div class="alert alert-warning">
+                        <i class="fa fa-info-circle"></i> <span id="selected-count">0</span> applicants selected for batch operations.
+                    </div>
+                </div>
+            </div>
             <div class="row no-print" style="margin-top: 15px; padding: 0 15px;">
                 <div class="col-md-6">
                     <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Delete selected applicants?')">
@@ -473,6 +506,10 @@ $school_year = isset($_GET['school_year']) ? $_GET['school_year'] : '';
     </div>
 </form>
 
+<link rel="stylesheet" href="<?php echo web_root; ?>plugins/datatables/dataTables.bootstrap.css">
+<script src="<?php echo web_root; ?>plugins/jQuery/jQuery-2.1.4.min.js"></script>
+<script src="<?php echo web_root; ?>plugins/datatables/jquery.dataTables.min.js"></script>
+<script src="<?php echo web_root; ?>plugins/datatables/dataTables.bootstrap.min.js"></script>
 <script>
 function viewApplicant(id) {
     window.location.href = './index.php?view=view&id=' + id;
@@ -482,31 +519,86 @@ function printTable() {
     window.print();
 }
 
+function updateSelectedCount() {
+    var checkboxes = document.querySelectorAll('input[name="selector[]"]:checked');
+    var count = checkboxes.length;
+    var info = document.getElementById('selection-info');
+    var countSpan = document.getElementById('selected-count');
+    if (count > 0) {
+        countSpan.textContent = count;
+        info.style.display = 'block';
+    } else {
+        info.style.display = 'none';
+    }
+}
+
 document.getElementById('chkAll').onclick = function() {
     var checkboxes = document.querySelectorAll('input[name="selector[]"]');
     for(var i = 0; i < checkboxes.length; i++) {
         checkboxes[i].checked = this.checked;
     }
+    updateSelectedCount();
 };
 
-$(document).ready(function() {
-    $('#dash-table').DataTable({
+jQuery(document).ready(function() {
+    <?php if($has_applicants): ?>
+    jQuery('#dash-table').DataTable({
         "pageLength": 25,
+        "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
+        "pagingType": "full_numbers",
+        "searching": true,
+        "info": true,
+        "responsive": true,
         "order": [[1, "asc"]],
-        "columnDefs": [
-            { "orderable": false, "targets": [0, 10] }
+        "pageLength": 25,
+"columnDefs": [
+            { "orderable": false, "targets": [0, 9] },
+            { "width": "5%", "targets": 0 },
+            { "width": "15%", "targets": [1,2,3] },
+            { "width": "10%", "targets": [4,5,6,7,8] },
+            { 
+                "targets": "_all",
+                "defaultContent": "N/A"
+            }
         ],
         "language": {
-            "emptyTable": "No applicants found",
-            "info": "Showing _START_ to _END_ of _TOTAL_ applicants",
-            "infoEmpty": "Showing 0 to 0 of 0 applicants",
-            "infoFiltered": "(filtered from _MAX_ total applicants)"
+            "lengthMenu": "Show _MENU_ applicants per page",
+            "zeroRecords": "No applicants found matching your search",
+            "info": "Showing page _PAGE_ of _PAGES_ | Displaying _START_ to _END_ of _TOTAL_ applicants",
+            "infoEmpty": "No applicants available",
+            "infoFiltered": " (filtered from _MAX_ total applicants)",
+            "search": "Search applicants:",
+            "paginate": {
+                "first": "First",
+                "last": "Last",
+                "next": "Next",
+                "previous": "Previous"
+            },
+            "emptyTable": "No applicants found. <a href='index.php?view=add' class='alert-link'>Click here to add a new applicant</a>."
         }
     });
     
-    $('#dash-table tbody tr').hover(
-        function() { $(this).css('background-color', '#e8f5e9'); },
-        function() { $(this).css('background-color', ''); }
-    );
+    jQuery('#dash-table').on('change', 'input[name="selector[]"]', function() {
+        updateSelectedCount();
+    });
+    
+    jQuery('#dash-table tbody tr').hover({
+        function() { 
+            if (!jQuery(this).hasClass('selected')) {
+                jQuery(this).css('background-color', '#e8f5e9 !important'); 
+            }
+        },
+        function() { 
+            if (!jQuery(this).hasClass('selected')) {
+                jQuery(this).css('background-color', ''); 
+            }
+        }
+    });
+
+    // Add row click to highlight
+    jQuery('#dash-table tbody').on('click', 'tr', function() {
+        jQuery(this).toggleClass('selected').css('background-color', jQuery(this).hasClass('selected') ? '#c8e6c9 !important' : '');
+    });
+    <?php endif; ?>
 });
 </script>

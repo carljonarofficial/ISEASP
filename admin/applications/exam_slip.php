@@ -57,7 +57,13 @@ if (isset($_POST['generate_slip'])) {
     
     $mydb->setQuery($sql);
     $mydb->executeQuery();
-    
+
+    // Add into exam result as pending
+    $result_sql = "INSERT INTO tbl_exam_results (APPLICANTID, EXAMINER_ID, EXAM_DATE, TOTAL_SCORE, PASSING_SCORE, REMARKS, CREATED_AT, UPDATED_AT) 
+                   VALUES ($id, " . $_SESSION['ADMIN_USERID'] . ", '$exam_date', NULL, 75, '', NOW(), NOW())";
+    $mydb->setQuery($result_sql);
+    $mydb->executeQuery();
+
     // FIXED: Log the action with new table structure
     $log_sql = "INSERT INTO tbl_application_log 
                 (APPLICANTID, USERID, USERNAME, USER_ROLE, ACTION, ACTION_TYPE, DETAILS)

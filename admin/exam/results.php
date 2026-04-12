@@ -4,41 +4,8 @@ if (!isset($_SESSION['ADMIN_USERID'])) {
 }
 ?>
 
-<div class="row">
-    <div class="col-lg-12">
-        <h1 class="page-header">Exam Results</h1>
-    </div>
-</div>
-
-<!-- Action Buttons -->
-<div class="row">
-    <div class="col-lg-12" style="margin-bottom: 10px;">
-        <a href="index.php?view=schedule" class="btn btn-primary">
-            <i class="fa fa-calendar"></i> View Schedule
-        </a>
-        <a href="index.php?view=batch_add" class="btn btn-primary">
-            <i class="fa fa-plus"></i> Batch Add/Edit
-        </a>
-        <button type="button" class="btn btn-success" id="batchExportBtn" disabled>
-            <i class="fa fa-download"></i> Export Selected
-        </button>
-        <button type="button" class="btn btn-warning" id="batchPrintBtn" disabled>
-            <i class="fa fa-print"></i> Print Selected
-        </button>
-        <button type="button" class="btn btn-danger" id="batchDeleteBtn" disabled onclick="confirmBatchDelete()">
-            <i class="fa fa-trash"></i> Delete Selected
-        </button>
-        <button type="button" class="btn btn-info" id="selectAllBtn">
-            <i class="fa fa-check-square"></i> Select All
-        </button>
-        <!-- <a href="#" onclick="window.print()" class="btn btn-default">
-            <i class="fa fa-print"></i> Print Results
-        </a> -->
-    </div>
-</div>
-
 <!-- Summary Stats -->
-<div class="row" style="margin-bottom: 15px;">
+<div class="row">
     <div class="col-lg-3 col-xs-6">
         <div class="small-box bg-green">
             <div class="inner">
@@ -110,7 +77,7 @@ if (!isset($_SESSION['ADMIN_USERID'])) {
 </div>
 
 <!-- Filter Section -->
-<div class="row" style="margin-bottom: 15px;">
+<div class="row">
     <div class="col-lg-12">
         <div class="panel panel-default">
             <div class="panel-heading">
@@ -153,6 +120,41 @@ if (!isset($_SESSION['ADMIN_USERID'])) {
     </div>
 </div>
 
+<!-- Batch Actions Panel -->
+<div class="row">
+    <div class="col-lg-12">
+        <div class="panel panel-default" style="margin-bottom: 20px;">
+            <div class="panel-heading">
+                <i class="fa fa-cogs"></i> Batch Actions
+            </div>
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <!-- <a href="index.php?view=batch_add" class="btn btn-sm btn-primary">
+                            <i class="fa fa-plus"></i> Batch Add/Edit
+                        </a> -->
+                        <button type="button" class="btn btn-sm btn-primary" id="batchAddEditBtn" disabled>
+                            Batch Add/Edit
+                        </button>
+                        <button type="button" class="btn btn-sm btn-success" id="batchExportBtn" disabled>
+                            <i class="fa fa-download"></i> Export
+                        </button>
+                        <button type="button" class="btn btn-smbtn-warning" id="batchPrintBtn" disabled>
+                            <i class="fa fa-print"></i> Print
+                        </button>
+                        <button type="button" class="btn btn-sm btn-danger" id="batchDeleteBtn" disabled onclick="confirmBatchDelete()">
+                            <i class="fa fa-trash"></i> Delete
+                        </button>
+                        <!-- <a href="#" onclick="window.print()" class="btn btn-default">
+                            <i class="fa fa-print"></i> Print Results
+                        </a> -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="table-responsive">
     <table id="dash-table" class="table table-striped table-bordered table-hover" style="font-size:13px">
         <thead>
@@ -182,14 +184,15 @@ if (!isset($_SESSION['ADMIN_USERID'])) {
             }
             
             if (isset($_GET['date_from']) && !empty($_GET['date_from'])) {
-                $date_from = $mydb->escape($_GET['date_from']);
+                $date_from = $mydb->escape_value($_GET['date_from']);
                 $where[] = "DATE(er.EXAM_DATE) >= '$date_from'";
             }
             
             if (isset($_GET['date_to']) && !empty($_GET['date_to'])) {
-                $date_to = $mydb->escape($_GET['date_to']);
+                $date_to = $mydb->escape_value($_GET['date_to']);
                 $where[] = "DATE(er.EXAM_DATE) <= '$date_to'";
             }
+            $where[] = "a.STATUS != 'Scholar'"; // Exclude scholars
             
             $where_clause = !empty($where) ? "WHERE " . implode(" AND ", $where) : "";
             
@@ -211,9 +214,13 @@ if (!isset($_SESSION['ADMIN_USERID'])) {
             $results = $mydb->loadResultList();
             
             foreach ($results as $r):
-                $result_label = ($r->TOTAL_SCORE >= $r->PASSING_SCORE) ? 
-                    '<span class="label label-success">PASSED</span>' : 
-                    '<span class="label label-danger">FAILED</span>';
+                if($r->TOTAL_SCORE === null) {
+                    $result_label = '<span class="label label-default">PENDING</span>';
+                } else {
+                    $result_label = ($r->TOTAL_SCORE >= $r->PASSING_SCORE) ? 
+                        '<span class="label label-success">PASSED</span>' : 
+                        '<span class="label label-danger">FAILED</span>';
+                }
             ?>
             <tr>
                 <td><input type="checkbox" class="result-checkbox" value="<?= $r->EXAM_RESULT_ID ?>"></td>
@@ -222,7 +229,7 @@ if (!isset($_SESSION['ADMIN_USERID'])) {
                 <td><?= htmlspecialchars($r->MUNICIPALITY ?? 'N/A') ?></td>
                 <td><?= htmlspecialchars($r->SCHOOL ?? 'N/A') ?></td>
                 <td><?= htmlspecialchars($r->COURSE ?? 'N/A') ?></td>
-                <td><strong><?= $r->TOTAL_SCORE ?>%</strong></td>
+                <td><strong><?= ($r->TOTAL_SCORE === null) ? "Pending" : $r->TOTAL_SCORE."%" ?></strong></td>
                 <td><?= $r->PASSING_SCORE ?>%</td>
                 <td><?= $result_label ?></td>
                 <td><?= htmlspecialchars($r->EXAMINER_NAME ?? 'N/A') ?></td>
@@ -268,7 +275,7 @@ $(document).ready(function() {
             { "orderable": false, "targets": 0 } // Make checkbox column non-sortable
         ]
     });
-    
+
     // Handle select all checkbox
     $('#selectAllCheckbox').on('change', function() {
         $('.result-checkbox').prop('checked', $(this).prop('checked'));
@@ -291,6 +298,15 @@ $(document).ready(function() {
         $('.result-checkbox').prop('checked', !allChecked);
         $('#selectAllCheckbox').prop('checked', !allChecked);
         updateBatchButtons();
+    });
+
+    // Batch add or edit
+    $('#batchAddEditBtn').on('click', function() {
+        var selectedIds = getSelectedIds();
+        if (selectedIds.length > 0) {
+            var url = 'index.php?view=batch_add&ids=' + selectedIds.join(',');
+            window.location.href = url;
+        }
     });
     
     // Batch export
@@ -322,17 +338,19 @@ function getSelectedIds() {
 
 function updateBatchButtons() {
     var selectedCount = $('.result-checkbox:checked').length;
-    $('#batchExportBtn, #batchPrintBtn, #batchDeleteBtn').prop('disabled', selectedCount === 0);
+    $('#batchAddEditBtn, #batchExportBtn, #batchPrintBtn, #batchDeleteBtn').prop('disabled', selectedCount === 0);
     
     // Update button text to show count
     if (selectedCount > 0) {
+        $('#batchAddEditBtn').html('<i class="fa fa-edit"></i> Add/Edit (' + selectedCount + ')');
         $('#batchExportBtn').html('<i class="fa fa-download"></i> Export (' + selectedCount + ')');
         $('#batchPrintBtn').html('<i class="fa fa-print"></i> Print (' + selectedCount + ')');
         $('#batchDeleteBtn').html('<i class="fa fa-trash"></i> Delete (' + selectedCount + ')');
     } else {
-        $('#batchExportBtn').html('<i class="fa fa-download"></i> Export Selected');
-        $('#batchPrintBtn').html('<i class="fa fa-print"></i> Print Selected');
-        $('#batchDeleteBtn').html('<i class="fa fa-trash"></i> Delete Selected');
+        $('#batchAddEditBtn').html('<i class="fa fa-edit"></i> Add/Edit');
+        $('#batchExportBtn').html('<i class="fa fa-download"></i> Export');
+        $('#batchPrintBtn').html('<i class="fa fa-print"></i> Print');
+        $('#batchDeleteBtn').html('<i class="fa fa-trash"></i> Delete');
     }
 }
 

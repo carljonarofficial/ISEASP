@@ -22,6 +22,9 @@ switch ($action) {
     case 'update_exam_status':
         updateExamStatus();
         break;
+    case 'batch_print_slips':
+        doBatchPrintSlips();
+        break;
 }
 
 // Cache requirements - Moved BEFORE switch for better organization
@@ -445,5 +448,83 @@ function updateExamStatus() {
         echo json_encode(['status' => 'success']);
         exit;
     }
+}
+
+function doBatchPrintSlips() {
+    global $mydb;
+
+    if (isset($_GET['ids']) && !empty($_GET['ids'])) {
+        $ids = explode(',', $_GET['ids']);
+        $ids = array_map('intval', $ids);
+
+        if (!empty($ids)) {
+            // Generate HTML for batch printing
+            $html = '<!DOCTYPE html>
+<html>
+<head>
+    <title>Batch Exam Slips</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .slip { page-break-after: always; border: 1px solid #ccc; padding: 20px; margin-bottom: 20px; }
+        .header { text-align: center; margin-bottom: 20px; }
+        .info { margin-bottom: 10px; }
+        .info strong { display: inline-block; width: 150px; }
+        @media print { .no-print { display: none; } }
+    </style>
+</head>
+<body>
+    <div class="no-print" style="text-align: center; margin-bottom: 20px;">
+        <button onclick="window.print()">Print All Slips</button>
+    </div>';
+
+            foreach ($ids as $applicant_id) {
+                $mydb->setQuery("SELECT * FROM tbl_applicants WHERE APPLICANTID = $applicant_id");
+                $applicant = $mydb->loadSingleResult();
+
+                if ($applicant) {
+                    $html .= '
+    <div class="slip">
+        <div class="header">
+            <h2>EXAMINATION SLIP</h2>
+            <h3>Provincial Government of Ilocos Sur</h3>
+        </div>
+
+        <div class="info">
+            <strong>Slip Number:</strong> ' . htmlspecialchars($applicant->EXAM_SLIP_NUMBER ?? 'N/A') . '<br>
+            <strong>Name:</strong> ' . htmlspecialchars($applicant->LASTNAME . ', ' . $applicant->FIRSTNAME . ' ' . ($applicant->MIDDLENAME ?? '')) . '<br>
+            <strong>Municipality:</strong> ' . htmlspecialchars($applicant->MUNICIPALITY ?? 'N/A') . '<br>
+            <strong>School:</strong> ' . htmlspecialchars($applicant->SCHOOL ?? 'N/A') . '<br>
+            <strong>Course:</strong> ' . htmlspecialchars($applicant->COURSE ?? 'N/A') . '<br>
+            <strong>Exam Date:</strong> ' . ($applicant->EXAM_DATE ? date('F d, Y', strtotime($applicant->EXAM_DATE)) : 'N/A') . '<br>
+            <strong>Exam Time:</strong> ' . ($applicant->EXAM_TIME ? date('h:i A', strtotime($applicant->EXAM_TIME)) : 'N/A') . '<br>
+            <strong>Venue:</strong> ' . htmlspecialchars($applicant->EXAM_VENUE ?? 'N/A') . '<br>
+        </div>
+
+        <div style="margin-top: 30px;">
+            <h4>IMPORTANT REMINDERS:</h4>
+            <ol>
+                <li>Present this slip upon entry to the examination room.</li>
+                <li>Bring the following:
+                    <ul>
+                        <li>Valid ID or Birth Certificate</li>
+                        <li>Ballpen and Pencil</li>
+                    </ul>
+                </li>
+                <li>Wear appropriate attire: White shirt and plain pants.</li>
+            </ol>
+        </div>
+    </div>';
+                }
+            }
+
+            $html .= '</body></html>';
+
+            echo $html;
+            exit;
+        }
+    }
+
+    // If no valid IDs, redirect back
+    redirect("index.php?view=results");
 }
 ?>

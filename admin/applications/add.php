@@ -711,49 +711,49 @@ textarea.form-control {
             <div class="card-body">
                 <div class="form-row">
                     <div class="form-group">
-                        <label><i class="fa fa-user"></i> Surname <span style="color:red;">*</span></span></label>
+                        <label>Surname <span style="color:red;">*</span></span></label>
                         <input type="text" name="LASTNAME" class="form-control" required placeholder="SURNAME">
                     </div>
                     <div class="form-group">
-                        <label><i class="fa fa-user"></i> First Name <span style="color:red;">*</span></span></label>
+                        <label>First Name <span style="color:red;">*</span></span></label>
                         <input type="text" name="FIRSTNAME" class="form-control" required placeholder="FIRST NAME">
                     </div>
                     <div class="form-group">
-                        <label><i class="fa fa-user"></i> Middle Name</label>
+                        <label>Middle Name</label>
                         <input type="text" name="MIDDLENAME" class="form-control" placeholder="MIDDLE NAME">
                     </div>
                     <div class="form-group">
-                        <label><i class="fa fa-user-plus"></i> Ext. (Jr., III)</label>
+                        <label>Ext. (Jr., III)</label>
                         <input type="text" name="SUFFIX" class="form-control" placeholder="e.g., JR., III">
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label><i class="fa fa-id-card"></i> LRN (Learner Reference Number) <span style="color:red;">*</span></span></label>
+                        <label>Learner Reference Number (LRN) (For Incoming 1st Year College Students) <span style="color:red;">*</span></span></label>
                         <input type="text" name="LRN" class="form-control" required placeholder="12-DIGIT LRN" maxlength="12" pattern="[0-9]{12}">
                     </div>
                     <div class="form-group">
-                        <label><i class="fa fa-id-badge"></i> ID Number  <span style="color:red;">*</span></span></label>
+                        <label>ID Number (For Current College Students)  <span style="color:red;">*</span></span></label>
                         <input type="text" name="ID_NUMBER" class="form-control" required placeholder="Enter Unique ID Number">
                     </div>
                     <div class="form-group">
-                        <label><i class="fa fa-birthday-cake"></i> Birthdate <span style="color:red;">*</span></span></label>
+                        <label>Birthdate <span style="color:red;">*</span></span></label>
                         <input type="date" name="BIRTHDATE" class="form-control" required onchange="calculateAge(this)">
                     </div>
                     <div class="form-group">
-                        <label><i class="fa fa-map-marker"></i> Birthplace</label>
+                        <label>Birthplace</label>
                         <input type="text" name="BIRTHPLACE" class="form-control" placeholder="CITY, PROVINCE">
                     </div>
                     <div class="form-group">
-                        <label><i class="fa fa-calendar"></i> Age</label>
+                        <label>Age</label>
                         <input type="text" id="age" class="form-control" readonly>
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label><i class="fa fa-venus-mars"></i> Sex <span style="color:red;">*</span></span></label>
+                        <label>Sex <span style="color:red;">*</span></span></label>
                         <select name="GENDER" class="form-control" required>
                             <option value="">SELECT</option>
                             <option value="Male">MALE</option>
@@ -761,7 +761,7 @@ textarea.form-control {
                         </select>
                     </div>
                     <div class="form-group">
-                        <label><i class="fa fa-heart"></i> Civil Status</label>
+                        <label>Civil Status</label>
                         <select name="CIVIL_STATUS" class="form-control">
                             <option value="Single">SINGLE</option>
                             <option value="Married">MARRIED</option>
@@ -770,11 +770,11 @@ textarea.form-control {
                         </select>
                     </div>
                     <div class="form-group">
-                        <label><i class="fa fa-church"></i> Religion</label>
+                        <label><Religion</label>
                         <input type="text" name="RELIGION" class="form-control" value="ROMAN CATHOLIC">
                     </div>
                     <div class="form-group">
-                        <label><i class="fa fa-phone"></i> Contact No. <span style="color:red;">*</span></label>
+                        <label>Contact No. <span style="color:red;">*</span></label>
                         <input 
                             type="text" 
                             name="CONTACT" 
@@ -793,11 +793,11 @@ textarea.form-control {
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label><i class="fa fa-envelope"></i> Email Address <span style="color:red;">*</span></span></label>
+                        <label>Email Address <span style="color:red;">*</span></span></label>
                         <input type="email" name="EMAIL" class="form-control" required placeholder="name@email.com">
                     </div>
                     <div class="form-group">
-                        <label><i class="fa fa-facebook"></i> Facebook URL (Optional)</label>
+                        <label>Facebook URL (Optional)</label>
                         <input type="text" name="FACEBOOK_URL" class="form-control" placeholder="facebook.com/username">
                     </div>
                 </div>
@@ -805,15 +805,15 @@ textarea.form-control {
                 <!-- EMERGENCY CONTACT SECTION - ADDED -->
                 <div class="form-row">
                     <div class="form-group">
-                        <label><i class="fa fa-phone"></i> Emergency Contact Name</label>
+                        <label>Emergency Contact Name</label>
                         <input type="text" name="EMERGENCY_CONTACT_NAME" class="form-control" placeholder="FULL NAME">
                     </div>
                     <div class="form-group">
-                        <label><i class="fa fa-phone"></i> Emergency Contact Number</label>
+                        <label>Emergency Contact Number</label>
                         <input type="text" name="EMERGENCY_CONTACT_NUMBER" class="form-control" placeholder="09123456789">
                     </div>
                     <div class="form-group">
-                        <label><i class="fa fa-heart"></i> Relationship</label>
+                        <label>Relationship</label>
                         <select name="EMERGENCY_CONTACT_RELATION" class="form-control" style="color: #000;">
                             <option value="" style="color: #000;">SELECT</option>
                             <option value="Father" style="color: #000;">Father</option>
@@ -830,22 +830,22 @@ textarea.form-control {
 
         <div class="application-card">
             <div class="card-header" onclick="toggleSection(this)">
-                <h3><i class="fa fa-map-marker"></i> ADDRESS INFORMATION</h3>
+                <h3>ADDRESS INFORMATION</h3>
                 <span class="toggle-icon"><i class="fa fa-chevron-down"></i></span>
             </div>
             <div class="card-body">
 
                 <h4 style="margin-bottom: 15px; color: var(--primary-dark);">
-                    <i class="fa fa-home"></i> Permanent Address  <span style="color:red;">*</span></span>
+                    Permanent Address  <span style="color:red;">*</span></span>
                 </h4>
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label><i class="fa fa-road"></i> Street / House No. <span style="color:red;">*</span></span></label>
+                        <label>Street / House No. <span style="color:red;">*</span></span></label>
                         <input type="text" name="PERM_STREET" class="form-control" required placeholder="HOUSE NO., STREET, PUROK">
                     </div>
                     <div class="form-group">
-                        <label><i class="fa fa-map-pin"></i> Barangay <span style="color:red;">*</span></span></label>
+                        <label>Barangay <span style="color:red;">*</span></span></label>
                         <select name="PERM_BARANGAY" id="perm_barangay" class="form-control" required>
                             <option value="">SELECT BARANGAY</option>
                         </select>
@@ -854,7 +854,7 @@ textarea.form-control {
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label><i class="fa fa-building"></i> Municipality / City <span style="color:red;">*</span></span></label>
+                        <label>Municipality / City <span style="color:red;">*</span></span></label>
                         <select name="PERM_MUNICIPALITY" class="form-control" required onchange="populateBarangays(this.value, 'perm_barangay')">
                             <option value="">SELECT MUNICIPALITY</option>
                             <?php
@@ -867,7 +867,7 @@ textarea.form-control {
                         </select>
                     </div>
                     <div class="form-group">
-                        <label><i class="fa fa-globe"></i> Province <span style="color:red;">*</span></span></label>
+                        <label>Province <span style="color:red;">*</span></span></label>
                         <input type="text" name="PERM_PROVINCE" class="form-control" required placeholder="PROVINCE" value="ILOCOS SUR" disabled>
                     </div>
                 </div>
@@ -883,11 +883,11 @@ textarea.form-control {
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label><i class="fa fa-road"></i> Street / House No.</label>
+                        <label>Street / House No.</label>
                         <input type="text" name="CURR_STREET" class="form-control" placeholder="HOUSE NO., STREET, PUROK">
                     </div>
                     <div class="form-group">
-                        <label><i class="fa fa-map-pin"></i> Barangay</label>
+                        <label>Barangay</label>
                         <select name="CURR_BARANGAY" id="curr_barangay" class="form-control" required>
                             <option value="">SELECT BARANGAY</option>
                         </select>
@@ -896,7 +896,7 @@ textarea.form-control {
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label><i class="fa fa-building"></i> Municipality / City</label>
+                        <label>Municipality / City</label>
                         <select name="CURR_MUNICIPALITY" class="form-control" required onchange="populateBarangays(this.value, 'curr_barangay')">
                             <option value="">SELECT MUNICIPALITY</option>
                             <?php
@@ -911,7 +911,7 @@ textarea.form-control {
                         </select>
                     </div>
                     <div class="form-group">
-                        <label><i class="fa fa-globe"></i> Province</label>
+                        <label>Province</label>
                         <input type="text" name="CURR_PROVINCE" class="form-control" placeholder="PROVINCE" value="ILOCOS SUR" disabled>
                     </div>
                 </div>
@@ -922,17 +922,17 @@ textarea.form-control {
         <!-- COURSE AND SCHOOL INFORMATION -->
         <div class="application-card">
             <div class="card-header" onclick="toggleSection(this)">
-                <h3><i class="fa fa-graduation-cap"></i> COURSE AND SCHOOL INFORMATION</h3>
+                <h3>COURSE AND SCHOOL INFORMATION</h3>
                 <span class="toggle-icon"><i class="fa fa-chevron-down"></i></span>
             </div>
             <div class="card-body">
                 <div class="form-row">
                     <div class="form-group">
-                        <label><i class="fa fa-book"></i> Course/Course Preference <span style="color:red;">*</span></span></label>
+                        <label>Course/Course Preference <span style="color:red;">*</span></span></label>
                         <input type="text" name="COURSE" class="form-control" required placeholder="e.g., BS INFORMATION TECHNOLOGY">
                     </div>
                     <div class="form-group">
-                        <label><i class="fa fa-layer-group"></i> Year Level <span style="color:red;">*</span></span></label>
+                        <label>Year Level <span style="color:red;">*</span></span></label>
                         <select name="YEARLEVEL" class="form-control" required>
                             <option value="">SELECT YEAR</option>
                             <option value="1st Year">1ST YEAR</option>
@@ -943,11 +943,11 @@ textarea.form-control {
                         </select>
                     </div>
                     <div class="form-group">
-                        <label><i class="fa fa-line-chart"></i> GWA (last SEM)</label>
+                        <label>GWA (last SEM)</label>
                         <input type="number" name="GPA" class="form-control" step="0.01" min="0" max="100" placeholder="e.g., 83.00">
                     </div>
                     <div class="form-group">
-                        <label><i class="fa fa-calendar"></i> School Year</label>
+                        <label>School Year</label>
                         <select name="SCHOOL_YEAR" class="form-control" style="color: #000;">
                             <option value="2025-2026" selected style="color: #000;">2025-2026</option>
                             <option value="2026-2027" style="color: #000;">2026-2027</option>
@@ -957,7 +957,7 @@ textarea.form-control {
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label><i class="fa fa-university"></i> School/College/University <span style="color:red;">*</span></span></label>
+                        <label>School/College/University <span style="color:red;">*</span></span></label>
                         <!-- <input type="text" name="SCHOOL" class="form-control" required placeholder="NAME OF SCHOOL"> -->
                         <select name="SCHOOL", class="form-control" required style="color: #000;">
                             <option value="" style="color: #000;">SELECT SCHOOL</option>
@@ -970,7 +970,7 @@ textarea.form-control {
                         </select>
                     </div>
                     <div class="form-group">
-                        <label><i class="fa fa-map-o"></i> District <span style="color:red;">*</span></span></label>
+                        <label>District <span style="color:red;">*</span></span></label>
                         <select name="DISTRICT" class="form-control" required style="color: #000;">
                             <option value="" style="color: #000;">SELECT DISTRICT</option>
                             <option value="1st District" style="color: #000;">1ST DISTRICT</option>
@@ -978,7 +978,7 @@ textarea.form-control {
                         </select>
                     </div>
                     <div class="form-group">
-                        <label><i class="fa fa-map-pin"></i> Municipality <span style="color:red;">*</span></span></label>
+                        <label>Municipality <span style="color:red;">*</span></span></label>
                         <select name="MUNICIPALITY" class="form-control" required onchange="" style="color: #000;">
                             <option value="">SELECT MUNICIPALITY</option>
                             <?php
@@ -1014,7 +1014,7 @@ textarea.form-control {
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label><i class="fa fa-trophy"></i> Other Scholarship?</label>
+                        <label>Other Scholarship?</label>
                         <div class="radio-group">
                             <label class="radio-item">
                                 <input type="radio" name="other_scholarship" value="Yes"> <span>YES</span>
@@ -1177,7 +1177,7 @@ textarea.form-control {
                 <!-- Siblings Section -->
                 <div class="form-row" style="margin-top: 20px;">
                     <div class="form-group">
-                        <label><i class="fa fa-users"></i> Number of siblings in the family</label>
+                        <label>Number of siblings in the family</label>
                         <input type="number" name="number_of_siblings" class="form-control" min="0" value="0" id="siblingCount" onchange="generateSiblingFields()">
                     </div>
                 </div>
@@ -1186,7 +1186,7 @@ textarea.form-control {
 
                 <div class="form-row" style="margin-top: 20px;">
                     <div class="form-group">
-                        <label><i class="fa fa-user-graduate"></i> Do you have any brother/sister who is also a recipient of the Ilocos Sur Educational Assistance and Scholarship Program?</label>
+                        <label>Do you have any brother/sister who is also a recipient of the Ilocos Sur Educational Assistance and Scholarship Program?</label>
                         <div class="radio-group">
                             <label class="radio-item">
                                 <input type="radio" name="sibling_scholar" value="Yes"> <span>YES</span>
@@ -1225,7 +1225,7 @@ textarea.form-control {
 
                     <!-- REQUIRED DOCUMENTS -->
                     <div class="requirements-category required-category">
-                        <h4><i class="fa fa-exclamation-triangle text-danger"></i> REQUIRED DOCUMENTS</h4>
+                        <h4>REQUIRED DOCUMENTS</h4>
 
                         <?php foreach ($requirements as $req): ?>
                             <?php if ($req->REQUIRED == 'Yes'): ?>
@@ -1249,7 +1249,7 @@ textarea.form-control {
 
                     <!-- OPTIONAL DOCUMENTS -->
                     <div class="requirements-category">
-                        <h4><i class="fa fa-money"></i> FINANCIAL DOCUMENTS (Optional)</h4>
+                        <h4>FINANCIAL DOCUMENTS (Optional)</h4>
 
                         <?php foreach ($requirements as $req): ?>
                             <?php if ($req->REQUIRED == 'No'): ?>
@@ -1276,7 +1276,7 @@ textarea.form-control {
                 <div class="form-row" style="margin-top: 20px;">
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label><i class="fa fa-heart"></i> 4Ps Beneficiary?</label>
+                            <label>4Ps Beneficiary?</label>
                             <select name="IS_4PS_BENEFICIARY" class="form-control" style="color: #000;">
                                 <option value="No" style="color: #000;">NO</option>
                                 <option value="Yes" style="color: #000;">YES</option>
@@ -1285,7 +1285,7 @@ textarea.form-control {
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label><i class="fa fa-leaf"></i> Indigenous People (IP)?</label>
+                            <label>Indigenous People (IP)?</label>
                             <select name="IS_INDIGENOUS" class="form-control" style="color: #000;">
                                 <option value="No" style="color: #000;">NO</option>
                                 <option value="Yes" style="color: #000;">YES</option>
@@ -1295,7 +1295,7 @@ textarea.form-control {
                 </div>
 
                 <div class="form-group">
-                    <label><i class="fa fa-sticky-note"></i> Additional Comments</label>
+                    <label>Additional Comments</label>
                     <textarea name="missing_notes" class="form-control" rows="2" placeholder="Note any additional comments regarding this applicant"></textarea>
                 </div>
 

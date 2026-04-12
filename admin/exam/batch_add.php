@@ -96,10 +96,14 @@ if (!isset($_SESSION['ADMIN_USERID'])) {
                                 <?php
                                 global $mydb;
 
+                                $ids = isset($_GET['ids']) ? $_GET['ids'] : '';
+                                $ids_array = !empty($ids) ? array_map('intval', explode(',', $ids)) : array();
+
                                 // Get applicants who can take exams (not scholars, not terminated)
                                 $sql = "
                                     SELECT
                                         a.*,
+                                        er.EXAM_RESULT_ID as EXISTING_RESULT_ID,
                                         er.TOTAL_SCORE as EXISTING_SCORE,
                                         er.PASSING_SCORE as EXISTING_PASSING,
                                         er.EXAM_DATE as EXISTING_DATE,
@@ -109,8 +113,9 @@ if (!isset($_SESSION['ADMIN_USERID'])) {
                                             ELSE 'No Result'
                                         END as RESULT_STATUS
                                     FROM tbl_applicants a
-                                    LEFT JOIN tbl_exam_results er ON a.APPLICANTID = er.APPLICANTID
+                                    INNER JOIN tbl_exam_results er ON a.APPLICANTID = er.APPLICANTID
                                     WHERE a.STATUS NOT IN ('Scholar', 'Graduated', 'Terminated')
+                                    AND er.EXAM_RESULT_ID IN (" . implode(',', $ids_array) . ")
                                     AND a.REQUIREMENT_STATUS = 'Complete'
                                     ORDER BY a.LASTNAME, a.FIRSTNAME
                                 ";

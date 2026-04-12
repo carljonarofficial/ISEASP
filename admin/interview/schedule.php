@@ -197,7 +197,7 @@ global $mydb;
                 <td class="text-center">
                     <a href="index.php?view=view&id=<?= $i->INTERVIEW_ID ?>" 
                        class="btn btn-info btn-xs" title="View Details">
-                        <i class="fa fa-eye"></i>
+                        <i class="fa fa-eye"></i> View Details
                     </a>
                     <a href="index.php?view=edit&id=<?= $i->INTERVIEW_ID ?>" 
                        class="btn btn-primary btn-xs" title="Edit / Enter Result">
@@ -228,6 +228,7 @@ global $mydb;
     </table>
 </div>
 
+<script src="<?php echo web_root; ?>plugins/jQuery/jQuery-2.1.4.min.js"></script>
 <script>
 $(document).ready(function() {
     $('#dash-table').DataTable({

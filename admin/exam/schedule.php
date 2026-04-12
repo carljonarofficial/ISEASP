@@ -8,68 +8,8 @@ if (!isset($_SESSION['ADMIN_USERID'])) {
 global $mydb;
 ?>
 
-<div class="row">
-    <div class="col-lg-12">
-        <h1 class="page-header">Exam Schedule</h1>
-    </div>
-</div>
-
-<!-- Summary Stats -->
-<div class="row" style="margin-bottom: 15px;">
-    <div class="col-lg-4 col-xs-6">
-        <div class="small-box bg-green">
-            <div class="inner">
-                <?php
-                $mydb->setQuery("SELECT COUNT(*) as total FROM tbl_applicants WHERE EXAM_SLIP_GENERATED IS NOT NULL AND EXAM_SLIP_GENERATED != '' AND EXAM_STATUS = 'Pending'");
-                $mydb->executeQuery();
-                $pending = $mydb->loadSingleResult();
-                ?>
-                <h3><?= $pending->total ?? 0 ?></h3>
-                <p>Pending Exams</p>
-            </div>
-            <div class="icon">
-                <i class="fa fa-clock-o"></i>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-lg-4 col-xs-6">
-        <div class="small-box bg-yellow">
-            <div class="inner">
-                <?php
-                $mydb->setQuery("SELECT COUNT(*) as total FROM tbl_applicants WHERE EXAM_STATUS = 'Passed'");
-                $mydb->executeQuery();
-                $passed = $mydb->loadSingleResult();
-                ?>
-                <h3><?= $passed->total ?? 0 ?></h3>
-                <p>Passed</p>
-            </div>
-            <div class="icon">
-                <i class="fa fa-check-circle"></i>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-lg-4 col-xs-6">
-        <div class="small-box bg-red">
-            <div class="inner">
-                <?php
-                $mydb->setQuery("SELECT COUNT(*) as total FROM tbl_applicants WHERE EXAM_STATUS = 'Failed'");
-                $mydb->executeQuery();
-                $failed = $mydb->loadSingleResult();
-                ?>
-                <h3><?= $failed->total ?? 0 ?></h3>
-                <p>Failed</p>
-            </div>
-            <div class="icon">
-                <i class="fa fa-times-circle"></i>
-            </div>
-        </div>
-    </div>
-</div>
-
 <!-- Filter Section -->
-<div class="row" style="margin-bottom: 15px;">
+<div class="row">
     <div class="col-lg-12">
         <div class="panel panel-default">
             <div class="panel-heading">
@@ -112,20 +52,36 @@ global $mydb;
     </div>
 </div>
 
-<!-- Action Buttons -->
-<div class="row">
-    <div class="col-lg-12" style="margin-bottom: 10px;">
-        <a href="index.php?view=results" class="btn btn-success">
-            <i class="fa fa-list"></i> View Results
-        </a>
-        <!-- <a href="#" onclick="window.print()" class="btn btn-default">
-            <i class="fa fa-print"></i> Print Schedule
-        </a> -->
+<!-- Batch Actions Panel -->
+<form id="batchForm" method="POST">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default" style="margin-bottom: 20px;">
+                <div class="panel-heading">
+                    <i class="fa fa-cogs"></i> Batch Actions
+                </div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-6 text-left">
+                            <button type="button" class="btn btn-info btn-sm" id="batchPrintBtn" disabled>
+                                <i class="fa fa-print"></i> Batch Print Exam Slips
+                            </button>
+                            <button type="button" class="btn btn-primary btn-sm" id="batchRescheduleBtn" disabled>
+                                <i class="fa fa-calendar"></i> Reschedule Selected
+                            </button>
+                            <button type="button" class="btn btn-danger btn-sm" id="batchCancelBtn" disabled>
+                                <i class="fa fa-times-circle"></i> Cancel Selected
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-</div>
+</form>
 
 <!-- Notice about pending exams -->
-<div class="alert alert-info">
+<div class="alert alert-info bg-blue">
     <i class="fa fa-info-circle"></i> 
     <strong>Note:</strong> Only applicants with pending exams are shown by default. 
     Once an exam result is recorded, the applicant will be removed from this list.
@@ -134,7 +90,7 @@ global $mydb;
 <div class="table-responsive">
     <table id="dash-table" class="table table-striped table-bordered table-hover" style="font-size:13px">
         <thead>
-            32
+                <th width="3%"><input type="checkbox" id="selectAllCheckbox" title="Select all on this page"></th>
                 <th>Exam Slip #</th>
                 <th>Applicant Name</th>
                 <th>Municipality</th>
@@ -144,7 +100,7 @@ global $mydb;
                 <th>Exam Time</th>
                 <th>Venue</th>
                 <th>Status</th>
-                <th width="15%">Action</th>
+                <th width="12%">Action</th>
             </thead>
         <tbody>
             <?php
@@ -194,6 +150,7 @@ global $mydb;
                 }
             ?>
              <tr>
+                <td><input type="checkbox" class="batch-checkbox" value="<?= $a->APPLICANTID ?>" title="Select this applicant"></td>
                 <td><?= htmlspecialchars($a->EXAM_SLIP_NUMBER ?? 'N/A') ?></td>
                 <td><?= htmlspecialchars($a->LASTNAME . ', ' . $a->FIRSTNAME . ' ' . ($a->MIDDLENAME ?? '')) ?></td>
                 <td><?= htmlspecialchars($a->MUNICIPALITY ?? 'N/A') ?></td>
@@ -204,15 +161,10 @@ global $mydb;
                 <td><?= htmlspecialchars($a->EXAM_VENUE ?? 'N/A') ?></td>
                 <td><span class="label <?= $status_color ?>"><?= $status_text ?></span></td>
                 <td class="text-center">
-                    <?php if ($a->EXAM_STATUS == 'Pending'): ?>
-                        <a href="index.php?view=add&id=<?= $a->APPLICANTID ?>" 
-                           class="btn btn-success btn-xs" title="Enter Result">
-                            <i class="fa fa-pencil"></i> Enter Result
-                        </a>
-                    <?php endif; ?>
+                    
                     <a href="../applications/index.php?view=print_slip&id=<?= $a->APPLICANTID ?>" 
                        class="btn btn-info btn-xs" title="Print Exam Slip" target="_blank">
-                        <i class="fa fa-print"></i> Print
+                        <i class="fa fa-print"></i> Print Exam SLip
                     </a>
                 </td>
             </tr>
@@ -220,8 +172,8 @@ global $mydb;
             
             <?php if (empty($applicants)): ?>
             <tr>
-                <td colspan="10" class="text-center">
-                    <div class="alert alert-info" style="margin: 20px;">
+                <td colspan="11" class="text-center">
+                    <div class="alert alert-warning" style="margin: 20px;">
                         <i class="fa fa-info-circle"></i> No pending exams found.
                     </div>
                 </td>
@@ -231,11 +183,98 @@ global $mydb;
     </table>
 </div>
 
+<script src="<?php echo web_root;?>plugins/jQuery/jQuery-2.1.4.min.js"></script>
 <script>
 $(document).ready(function() {
-    $('#dash-table').DataTable({
+    var table = $('#dash-table').DataTable({
         "pageLength": 25,
-        "order": [[5, "asc"], [6, "asc"]]
+        "order": [[6, "asc"], [7, "asc"]],
+        "columnDefs": [
+            { "orderable": false, "targets": 0 },
+            { "targets": "_all", "defaultContent": "" } // <--- Add this line
+        ]
     });
+
+    // Handle master checkbox
+    $('#selectAllCheckbox').on('change', function() {
+        $('input.batch-checkbox:visible').prop('checked', $(this).prop('checked'));
+        updateBatchUI();
+    });
+
+    // Handle individual checkboxes
+    $(document).on('change', 'input.batch-checkbox', function() {
+        updateBatchUI();
+    });
+
+    // Select All button
+    $('#selectAllBtn').on('click', function(e) {
+        e.preventDefault();
+        $('input.batch-checkbox:visible').prop('checked', true);
+        $('#selectAllCheckbox').prop('checked', true);
+        updateBatchUI();
+    });
+
+    // Clear All button
+    $('#clearAllBtn').on('click', function(e) {
+        e.preventDefault();
+        $('input.batch-checkbox').prop('checked', false);
+        $('#selectAllCheckbox').prop('checked', false);
+        updateBatchUI();
+    });
+
+    // Batch Print
+    $('#batchPrintBtn').on('click', function(e) {
+        e.preventDefault();
+        var selected = getSelectedIds();
+        if(selected.length === 0) {
+            alert('Please select at least one applicant');
+            return;
+        }
+        if(confirm('Proceed to batch exam slip print page for ' + selected.length + ' examinees?')) {
+            window.location.href = 'index.php?view=batch_print&ids=' + selected.join(',');
+        }
+    });
+
+    // Batch Reschedule
+    $('#batchRescheduleBtn').on('click', function(e) {
+        e.preventDefault();
+        var selected = getSelectedIds();
+        if(selected.length === 0) {
+            alert('Please select at least one applicant');
+            return;
+        }
+        window.location.href = 'index.php?view=batch_reschedule&ids=' + selected.join(',');
+    });
+
+    // Batch Cancel
+    $('#batchCancelBtn').on('click', function(e) {
+        e.preventDefault();
+        var selected = getSelectedIds();
+        if(selected.length === 0) {
+            alert('Please select at least one applicant');
+            return;
+        }
+        if(confirm('Cancel exams for ' + selected.length + ' applicant(s)? This action cannot be undone.')) {
+            window.location.href = 'index.php?view=batch_cancel&ids=' + selected.join(',');
+        }
+    });
+
+    function getSelectedIds() {
+        var ids = [];
+        $('input.batch-checkbox:checked').each(function() {
+            ids.push($(this).val());
+        });
+        return ids;
+    }
+
+    function updateBatchUI() {
+        var count = $('input.batch-checkbox:checked').length;
+        $('#selectedCount').text(count);
+        
+        var disabled = count === 0;
+        $('#batchPrintBtn').prop('disabled', disabled);
+        $('#batchRescheduleBtn').prop('disabled', disabled);
+        $('#batchCancelBtn').prop('disabled', disabled);
+    }
 });
 </script>

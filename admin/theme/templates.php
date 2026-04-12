@@ -5,6 +5,8 @@
     <title>ISEASP - Ilocos Sur Educational Assistance & Scholarship Program</title>
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
 
+    <!-- Favicon -->
+    <link rel="icon" href="<?php echo web_root;?>uploads/iseasp_logo.ico" type="image/png">
     <!-- Bootstrap 3.3.5 -->
     <link rel="stylesheet" href="<?php echo web_root;?>bootstrap/css/bootstrap.min.css">
     <!-- Font Awesome -->
@@ -26,15 +28,15 @@
     <!-- Custom CSS -->
     <style>
         .skin-green .main-header .navbar {
-            background-color: #27ae60;
+            background-color: #3E64D6;
         }
         .skin-green .main-header .logo {
-            background-color: #229954;
+            background-color: #29428E;
             color: #fff;
             border-bottom: 0 solid transparent;
         }
         .skin-green .main-header .logo:hover {
-            background-color: #1e8449;
+            background-color: #7081B3;
         }
         .profile-img {
             width: 110px;
@@ -215,7 +217,7 @@
                     </li>
 
                     <!-- Applicants & Requirements -->
-                    <li class="treeview <?php echo (strpos($_SERVER['REQUEST_URI'], 'applications') !== false || strpos($_SERVER['REQUEST_URI'], 'checklist') !== false) ? "active" : "";?>">
+                    <li class="treeview <?php echo (strpos($_SERVER['REQUEST_URI'], 'applications') !== false || (strpos($_SERVER['REQUEST_URI'], 'checklist') !== false && !(basename($_SERVER['PHP_SELF']) == 'index.php' && isset($_GET['view']) && $_GET['view'] == 'manage_req'))) ? "active" : ""; ?>">
                         <a href="#">
                             <i class="fa fa-users"></i> <span>Applicants</span>
                             <span class="pull-right-container">
@@ -226,7 +228,6 @@
                             <li><a href="<?php echo web_root;?>admin/applications/"><i class="fa fa-circle-o"></i> All Applicants</a></li>
                             <li><a href="<?php echo web_root;?>admin/applications/index.php?view=add"><i class="fa fa-circle-o"></i> Add New Applicant</a></li>
                             <li><a href="<?php echo web_root;?>admin/checklist/"><i class="fa fa-circle-o"></i> Applicant Checklist</a></li>
-                            <li><a href="<?php echo web_root;?>admin/checklist/index.php?view=manage_req"><i class="fa fa-circle-o"></i> Manage Requirements</a></li>
                         </ul>
                     </li>
 
@@ -329,7 +330,7 @@
                     </li> -->
 
                     <!-- System Settings -->
-                    <li class="treeview <?php echo (strpos($_SERVER['REQUEST_URI'], 'system') !== false) ? "active" : "";?>">
+                    <li class="treeview <?php echo (strpos($_SERVER['REQUEST_URI'], 'system') !== false || (basename($_SERVER['PHP_SELF']) == 'index.php' && isset($_GET['view']) && $_GET['view'] == 'manage_req' && strpos($_SERVER['REQUEST_URI'], 'checklist') !== false)) ? "active" : "";?>">
                         <a href="#">
                             <i class="fa fa-cogs"></i> <span>System</span>
                             <span class="pull-right-container">
@@ -339,6 +340,8 @@
                         <ul class="treeview-menu">
                             <!-- <li><a href="<?php echo web_root;?>admin/system/index.php?view=users"><i class="fa fa-users"></i> Manage Users</a></li> -->
                              <li><a href="<?php echo web_root;?>admin/system/index.php?view=list"><i class="fa fa-users"></i> Manage Users</a></li>
+                             <li><a href="<?php echo web_root; ?>admin/checklist/index.php?view=manage_req"><i class="fa fa-circle-o"></i> Manage
+                                    Requirements</a></li>
                             <li><a href="<?php echo web_root;?>admin/system/index.php?view=settings"><i class="fa fa-wrench"></i> System Settings</a></li>
                             <li><a href="<?php echo web_root;?>admin/system/index.php?view=logs"><i class="fa fa-history"></i> Activity Logs</a></li>
                             <!-- <li><a href="<?php echo web_root;?>admin/system/index.php?view=backup"><i class="fa fa-database"></i> Database Backup</a></li> -->
