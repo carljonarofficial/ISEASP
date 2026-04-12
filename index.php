@@ -17,7 +17,7 @@ require_once("include/initialize.php");
     
     <style>
         :root {
-            --primary-color: #27ae60;
+            --primary-color: #3E64D6;
             --primary-dark: #219a52;
             --primary-light: #2ecc71;
             --secondary-color: #3498db;
@@ -37,7 +37,7 @@ require_once("include/initialize.php");
 
         body {
             font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-color: #2d4281;
             min-height: 100vh;
             color: #333;
         }
@@ -57,7 +57,7 @@ require_once("include/initialize.php");
         .navbar-brand {
             font-weight: 800;
             font-size: 1.6rem;
-            color: var(--primary-color) !important;
+            color: #3E64D6 !important;
             letter-spacing: -0.5px;
         }
 
@@ -94,7 +94,7 @@ require_once("include/initialize.php");
         }
 
         .btn-login {
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            background: linear-gradient(135deg, #3E64D6, #3E64D6);
             color: white !important;
             padding: 8px 25px !important;
             border-radius: 50px;
@@ -148,7 +148,7 @@ require_once("include/initialize.php");
         }
 
         .hero-title span {
-            color: var(--primary-light);
+            color: #3E64D6;
         }
 
         .hero-subtitle {

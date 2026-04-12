@@ -138,7 +138,7 @@ $current_sy = '2025-2026';
                 <div class="icon">
                     <i class="fa fa-file-text"></i>
                 </div>
-                <a href="<?php echo web_root; ?>admin/applications/index.php?view=pending" class="small-box-footer">
+                <a href="<?php echo web_root; ?>admin/applications/" class="small-box-footer">
                     Review Applications <i class="fa fa-arrow-circle-right"></i>
                 </a>
             </div>
@@ -153,7 +153,7 @@ $current_sy = '2025-2026';
                 <div class="icon">
                     <i class="fa fa-users"></i>
                 </div>
-                <a href="<?php echo web_root; ?>admin/applications/index.php?view=for_interview" class="small-box-footer">
+                <a href="<?php echo web_root; ?>admin/applications/index.php?stage=interview" class="small-box-footer">
                     View Interviews <i class="fa fa-arrow-circle-right"></i>
                 </a>
             </div>
@@ -168,7 +168,7 @@ $current_sy = '2025-2026';
                 <div class="icon">
                     <i class="fa fa-star"></i>
                 </div>
-                <a href="<?php echo web_root; ?>admin/applications/index.php?view=qualified" class="small-box-footer">
+                <a href="<?php echo web_root; ?>admin/applications/index.php?stage=qualified" class="small-box-footer">
                     View Qualified <i class="fa fa-arrow-circle-right"></i>
                 </a>
             </div>

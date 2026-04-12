@@ -6,11 +6,11 @@ if (!isset($_SESSION['ADMIN_USERID'])) {
 global $mydb;
 ?>
 
-<div class="row">
+<!-- <div class="row">
     <div class="col-lg-12">
         <h1 class="page-header">Requirements Checklist</h1>
     </div>
-</div>
+</div> -->
 
 <!-- Summary Stats -->
 <div class="row" style="margin-bottom: 15px;">

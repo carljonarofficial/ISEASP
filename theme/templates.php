@@ -5,6 +5,8 @@
 <title>ISEASP / <?php echo $title;?></title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="description" content="" />
+<!-- Favicon -->
+<link rel="icon" href="<?php echo web_root; ?>uploads/iseasp_logo.ico" type="image/png">
 <!-- css -->
 <link href="<?php echo web_root; ?>plugins/home-plugins/css/bootstrap.min.css" rel="stylesheet" />
 <link href="<?php echo web_root; ?>plugins/home-plugins/css/fancybox/jquery.fancybox.css" rel="stylesheet"> 

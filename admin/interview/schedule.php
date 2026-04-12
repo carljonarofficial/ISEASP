@@ -6,14 +6,8 @@ if (!isset($_SESSION['ADMIN_USERID'])) {
 global $mydb;
 ?>
 
-<div class="row">
-    <div class="col-lg-12">
-        <h1 class="page-header">Interview Schedule</h1>
-    </div>
-</div>
-
 <!-- Summary Stats -->
-<div class="row" style="margin-bottom: 15px;">
+<!-- <div class="row" style="margin-bottom: 15px;">
     <div class="col-lg-4 col-xs-6">
         <div class="small-box bg-green">
             <div class="inner">
@@ -64,7 +58,7 @@ global $mydb;
             </div>
         </div>
     </div>
-</div>
+</div> -->
 
 <!-- Filter Section -->
 <div class="row" style="margin-bottom: 15px;">
@@ -96,6 +90,36 @@ global $mydb;
                             <option value="For Review" <?= isset($_GET['status']) && $_GET['status'] == 'For Review' ? 'selected' : '' ?>>Pending</option>
                             <option value="Pass" <?= isset($_GET['status']) && $_GET['status'] == 'Pass' ? 'selected' : '' ?>>Pass</option>
                             <option value="Fail" <?= isset($_GET['status']) && $_GET['status'] == 'Fail' ? 'selected' : '' ?>>Fail</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group" style="margin-right: 10px;">
+                        <label>Municipality:</label>
+                        <select name="municipality" class="form-control input-sm">
+                            <option value="">All</option>
+                            <?php
+                            $mydb->setQuery("SELECT DISTINCT a.MUNICIPALITY FROM tbl_interview i INNER JOIN tbl_applicants a ON i.APPLICANTID = a.APPLICANTID LEFT JOIN tblusers u ON i.INTERVIEWER_ID = u.USERID");
+                            $mydb->executeQuery();
+                            $municipalities = $mydb->loadResultList();
+                            foreach ($municipalities as $municipality) {
+                                echo "<option value='{$municipality->MUNICIPALITY}' " . (isset($_GET['municipality']) && $_GET['municipality'] == $municipality->MUNICIPALITY ? "selected" : "") . ">{$municipality->MUNICIPALITY}</option>";
+                            }
+                            ?>
+                        </select>
+                    </div>
+
+                    <div class="form-group" style="margin-right: 10px;">
+                        <label>School:</label>
+                        <select name="school" class="form-control input-sm">
+                            <option value="">All</option>
+                            <?php
+                            $mydb->setQuery("SELECT DISTINCT a.SCHOOL FROM tbl_interview i INNER JOIN tbl_applicants a ON i.APPLICANTID = a.APPLICANTID LEFT JOIN tblusers u ON i.INTERVIEWER_ID = u.USERID");
+                            $mydb->executeQuery();
+                            $schools = $mydb->loadResultList();
+                            foreach ($schools as $school) {
+                                echo "<option value='{$school->SCHOOL}' " . (isset($_GET['school']) && $_GET['school'] == $school->SCHOOL ? "selected" : "") . ">{$school->SCHOOL}</option>";
+                            }
+                            ?>
                         </select>
                     </div>
                     
@@ -161,6 +185,16 @@ global $mydb;
                 $where[] = "i.RECOMMENDATION = '$status'";
             }
 
+            if (isset($_GET['municipality']) && !empty($_GET['municipality'])) {
+                $municipality = $_GET['municipality'];
+                $where[] = "a.MUNICIPALITY = '$municipality'";
+            }
+
+            if (isset($_GET['school']) && !empty($_GET['school'])) {
+                $school = $_GET['school'];
+                $where[] = "a.SCHOOL = '$school'";
+            }
+
             $where_clause = !empty($where) ? "WHERE " . implode(" AND ", $where) : "";
 
             $sql = "
@@ -208,7 +242,7 @@ global $mydb;
                        class="btn btn-danger btn-xs" 
                        onclick="return confirm('Delete this interview record?')"
                        title="Delete">
-                        <i class="fa fa-trash"></i>
+                        <i class="fa fa-trash"></i> Delete
                     </a>
                     <?php endif; ?>
                 </td>

@@ -6,14 +6,8 @@ if (!isset($_SESSION['ADMIN_USERID'])) {
 global $mydb;
 ?>
 
-<div class="row">
-    <div class="col-lg-12">
-        <h1 class="page-header">Active Scholars</h1>
-    </div>
-</div>
-
 <!-- Summary Cards -->
-<div class="row" style="margin-bottom: 15px;">
+<!-- <div class="row" style="margin-bottom: 15px;">
     <div class="col-lg-3 col-xs-6">
         <div class="small-box bg-green">
             <div class="inner">
@@ -82,7 +76,7 @@ global $mydb;
             </div>
         </div>
     </div>
-</div>
+</div> -->
 
 <!-- Action Buttons -->
 <div class="row">
@@ -149,6 +143,23 @@ global $mydb;
                             <?php endforeach; ?>
                         </select>
                     </div>
+
+                    <div class="form-group" style="margin-right: 10px;">
+                        <label>School:</label>
+                        <select name="school" class="form-control input-sm">
+                            <option value="">All Schools</option>
+                            <?php
+                            $mydb->setQuery("SELECT DISTINCT a.SCHOOL FROM tbl_scholarship_awards sa INNER JOIN tbl_applicants a ON sa.APPLICANTID = a.APPLICANTID LEFT JOIN tblusers u ON sa.AWARDED_BY = u.USERID");
+                            $mydb->executeQuery();
+                            $schools = $mydb->loadResultList();
+                            foreach ($schools as $school):
+                            ?>
+                            <option value="<?= $school->SCHOOL ?>" <?= isset($_GET['school']) && $_GET['school'] == $school->SCHOOL ? 'selected' : '' ?>>
+                                <?= $school->SCHOOL ?>
+                            </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
                     
                     <div class="form-group" style="margin-right: 10px;">
                         <label>Year Level:</label>
@@ -201,7 +212,7 @@ global $mydb;
                         <th>Year Level</th>
                         <th>School Year</th>
                         <th>Semester</th>
-                        <th>Award Amount</th>
+                        <th>Allowance Amount</th>
                         <th>Status</th>
                         <th width="15%">Action</th>
                     </tr>
@@ -300,13 +311,14 @@ global $mydb;
     </div>
 </div>
 
+<script src="<?php echo web_root; ?>plugins/jQuery/jQuery-2.1.4.min.js"></script>
 <script>
 $(document).ready(function() {
     $('#scholars-table').DataTable({
         "pageLength": 25,
         "order": [[1, "asc"]],
         "columnDefs": [
-            { "orderable": false, "targets": [10] }
+            { "targets": "_all", "defaultContent": "" } // <--- Add this line
         ]
     });
 });

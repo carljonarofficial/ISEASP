@@ -18,12 +18,6 @@ global $mydb;
 // echo '</div>';
 ?>
 
-<div class="row">
-    <div class="col-lg-12">
-        <h1 class="page-header">Graduated Scholars</h1>
-    </div>
-</div>
-
 <!-- Graduation Statistics -->
 <div class="row" style="margin-bottom: 20px;">
     <div class="col-md-3">
@@ -71,7 +65,7 @@ global $mydb;
                 $mydb->setQuery("SELECT AVG(GPA) as avg FROM tbl_applicants WHERE STATUS = 'Graduated' AND GPA IS NOT NULL");
                 $mydb->executeQuery();
                 $result = $mydb->loadSingleResult();
-                $avg_gpa = $result ? round($result->avg, 2) : 0;
+                $avg_gpa = $result->avg !== null ? round($result->avg, 2) : 0;
                 ?>
                 <h3><?= $avg_gpa ?>%</h3>
                 <p>Average GPA</p>
@@ -143,9 +137,46 @@ global $mydb;
                     
                     <div class="form-group" style="margin-right: 10px;">
                         <label>Municipality:</label>
-                        <input type="text" name="municipality" class="form-control input-sm" 
-                               value="<?= isset($_GET['municipality']) ? $_GET['municipality'] : '' ?>" 
-                               placeholder="Enter municipality">
+                        <select name="municipality" class="form-control input-sm">
+                            <option value="">All Municipalities</option>
+                            <?php
+                            $mydb->setQuery("SELECT 
+                                    DISTINCT a.MUNICIPALITY
+                                FROM tbl_scholarship_awards sa
+                                INNER JOIN tbl_applicants a ON sa.APPLICANTID = a.APPLICANTID
+                                LEFT JOIN tbl_alumni al ON a.APPLICANTID = al.APPLICANTID
+                                WHERE sa.STATUS = 'Graduated' ");
+                            $mydb->executeQuery();
+                            $municipalities = $mydb->loadResultList();
+                            foreach ($municipalities as $m):
+                            ?>
+                            <option value="<?= htmlspecialchars($m->MUNICIPALITY) ?>" <?= isset($_GET['municipality']) && $_GET['municipality'] == $m->MUNICIPALITY ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($m->MUNICIPALITY) ?>
+                            </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
+                    <div class="form-group" style="margin-right: 10px;">
+                        <label>School:</label>
+                        <select name="school" class="form-control input-sm">
+                            <option value="">All Schools</option>
+                            <?php
+                            $mydb->setQuery("SELECT 
+                                    DISTINCT a.SCHOOL
+                                FROM tbl_scholarship_awards sa
+                                INNER JOIN tbl_applicants a ON sa.APPLICANTID = a.APPLICANTID
+                                LEFT JOIN tbl_alumni al ON a.APPLICANTID = al.APPLICANTID
+                                WHERE sa.STATUS = 'Graduated' ");
+                            $mydb->executeQuery();
+                            $municipalities = $mydb->loadResultList();
+                            foreach ($municipalities as $m):
+                            ?>
+                            <option value="<?= htmlspecialchars($m->SCHOOL) ?>" <?= isset($_GET['school']) && $_GET['school'] == $m->SCHOOL ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($m->SCHOOL) ?>
+                            </option>
+                            <?php endforeach; ?>
+                        </select>
                     </div>
                     
                     <button type="submit" class="btn btn-primary btn-sm">
@@ -196,6 +227,10 @@ global $mydb;
                             
                             if (isset($_GET['municipality']) && !empty($_GET['municipality'])) {
                                 $where[] = "a.MUNICIPALITY LIKE '%" . $_GET['municipality'] . "%'";
+                            }
+
+                            if (isset($_GET['school']) && !empty($_GET['school'])) {
+                                $where[] = "a.SCHOOL LIKE '%" . $_GET['school'] . "%'";
                             }
                             
                             $where_clause = "WHERE " . implode(" AND ", $where);

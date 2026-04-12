@@ -15,7 +15,7 @@ global $mydb;
 </div>
 
 <!-- Summary Stats -->
-<div class="row" style="margin-bottom: 15px;">
+<!-- <div class="row" style="margin-bottom: 15px;">
     <div class="col-lg-4 col-xs-6">
         <div class="small-box bg-yellow">
             <div class="inner">
@@ -66,7 +66,7 @@ global $mydb;
             </div>
         </div>
     </div>
-</div>
+</div> -->
 
 <!-- Tabs for different stages -->
 <ul class="nav nav-tabs">
@@ -88,7 +88,7 @@ global $mydb;
             </div>
             <div class="panel-body">
                 <div class="table-responsive">
-                    <table class="table table-striped table-bordered">
+                    <table id="dash-table" class="table table-striped table-bordered">
                         <thead>
                             <tr>
                                 <th>Applicant Name</th>
@@ -236,3 +236,16 @@ global $mydb;
         </div>
     </div>
 </div>
+
+<script src="<?php echo web_root; ?>plugins/jQuery/jQuery-2.1.4.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $('#dash-table').DataTable({
+            "pageLength": 25,
+            "order": [[0, "desc"]],
+            "columnDefs": [
+                { "targets": "_all", "defaultContent": "" } // <--- Add this line
+            ]
+        });
+    });
+</script>

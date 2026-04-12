@@ -6,12 +6,6 @@ if (!isset($_SESSION['ADMIN_USERID'])) {
 global $mydb;
 ?>
 
-<div class="row">
-    <div class="col-lg-12">
-        <h1 class="page-header">Scholarship History</h1>
-    </div>
-</div>
-
 <!-- Filter Section -->
 <div class="row" style="margin-bottom: 15px;">
     <div class="col-lg-12">
@@ -38,9 +32,37 @@ global $mydb;
                     
                     <div class="form-group" style="margin-right: 10px;">
                         <label>School Year:</label>
-                        <input type="text" name="school_year" class="form-control input-sm" 
+                        <select name="school_year" class="form-control input-sm">
+                            <option value="">All Years</option>
+                            <?php
+                            // Fetch distinct school years from the database
+                            $mydb->setQuery("SELECT h.SCHOOL_YEAR FROM tbl_scholarship_history h INNER JOIN tbl_applicants a ON h.APPLICANTID = a.APPLICANTID LEFT JOIN tblusers u ON h.UPDATED_BY = u.USERID;");
+                            $years = $mydb->loadResultList();
+                            foreach ($years as $year) {
+                                $selected = (isset($_GET['school_year']) && $_GET['school_year'] == $year->SCHOOL_YEAR) ? 'selected' : '';
+                                echo "<option value=\"{$year->SCHOOL_YEAR}\" $selected>{$year->SCHOOL_YEAR}</option>";
+                            }
+                            ?>
+                        </select>
+                        <!-- <input type="text" name="school_year" class="form-control input-sm" 
                                value="<?= isset($_GET['school_year']) ? $_GET['school_year'] : '' ?>" 
-                               placeholder="e.g. 2025-2026">
+                               placeholder="e.g. 2025-2026"> -->
+                    </div>
+
+                    <div class="form-group" style="margin-right: 10px;">
+                        <label>School:</label>
+                        <select name="school" class="form-control input-sm">
+                            <option value="">All Schools</option>
+                            <?php
+                            // Fetch distinct schools from the database
+                            $mydb->setQuery("SELECT DISTINCT a.SCHOOL FROM tbl_applicants a INNER JOIN tbl_scholarship_history h ON h.APPLICANTID = a.APPLICANTID LEFT JOIN tblusers u ON h.UPDATED_BY = u.USERID;");
+                            $schools = $mydb->loadResultList();
+                            foreach ($schools as $school) {
+                                $selected = (isset($_GET['school']) && $_GET['school'] == $school->SCHOOL) ? 'selected' : '';
+                                echo "<option value=\"{$school->SCHOOL}\" $selected>{$school->SCHOOL}</option>";
+                            }
+                            ?>
+                        </select>
                     </div>
                     
                     <button type="submit" class="btn btn-primary btn-sm">
@@ -142,3 +164,16 @@ global $mydb;
         </tbody>
     </table>
 </div>
+
+<script src="<?php echo web_root; ?>plugins/jQuery/jQuery-2.1.4.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $('#dash-table').DataTable({
+            "pageLength": 25,
+            "order": [[0, "desc"]],
+            "columnDefs": [
+                { "targets": "_all", "defaultContent": "" } // <--- Add this line
+            ]
+        });
+    });
+</script>

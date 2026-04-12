@@ -6,14 +6,8 @@ if (!isset($_SESSION['ADMIN_USERID'])) {
 global $mydb;
 ?>
 
-<div class="row">
-    <div class="col-lg-12">
-        <h1 class="page-header">Interview Results</h1>
-    </div>
-</div>
-
 <!-- Summary Cards -->
-<div class="row" style="margin-bottom: 15px;">
+<!-- <div class="row" style="margin-bottom: 15px;">
     <div class="col-lg-3 col-xs-6">
         <div class="small-box bg-green">
             <div class="inner">
@@ -81,7 +75,7 @@ global $mydb;
             </div>
         </div>
     </div>
-</div>
+</div> -->
 
 <!-- Filter Section -->
 <div class="row" style="margin-bottom: 15px;">
@@ -114,6 +108,36 @@ global $mydb;
                         <label>Date To:</label>
                         <input type="date" name="date_to" class="form-control input-sm" 
                                value="<?= isset($_GET['date_to']) ? $_GET['date_to'] : '' ?>">
+                    </div>
+
+                    <div class="form-group" style="margin-right: 10px;">
+                        <label>Municipality:</label>
+                        <select name="municipality" class="form-control input-sm">
+                            <option value="">All</option>
+                            <?php
+                            $mydb->setQuery("SELECT DISTINCT a.MUNICIPALITY FROM tbl_interview i INNER JOIN tbl_applicants a ON i.APPLICANTID = a.APPLICANTID LEFT JOIN tblusers u ON i.INTERVIEWER_ID = u.USERID");
+                            $mydb->executeQuery();
+                            $municipalities = $mydb->loadResultList();
+                            foreach ($municipalities as $municipality) {
+                                echo "<option value='{$municipality->MUNICIPALITY}' " . (isset($_GET['municipality']) && $_GET['municipality'] == $municipality->MUNICIPALITY ? "selected" : "") . ">{$municipality->MUNICIPALITY}</option>";
+                            }
+                            ?>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group" style="margin-right: 10px;">
+                        <label>School:</label>
+                        <select name="school" class="form-control input-sm">
+                            <option value="">All</option>
+                            <?php
+                            $mydb->setQuery("SELECT DISTINCT a.SCHOOL FROM tbl_interview i INNER JOIN tbl_applicants a ON i.APPLICANTID = a.APPLICANTID LEFT JOIN tblusers u ON i.INTERVIEWER_ID = u.USERID");
+                            $mydb->executeQuery();
+                            $schools = $mydb->loadResultList();
+                            foreach ($schools as $school) {
+                                echo "<option value='{$school->SCHOOL}' " . (isset($_GET['school']) && $_GET['school'] == $school->SCHOOL ? "selected" : "") . ">{$school->SCHOOL}</option>";
+                            }
+                            ?>
+                        </select>
                     </div>
                     
                     <button type="submit" class="btn btn-primary btn-sm">
@@ -161,6 +185,16 @@ global $mydb;
             if (isset($_GET['date_to']) && !empty($_GET['date_to'])) {
                 $date_to = $_GET['date_to'];
                 $where[] = "DATE(i.INTERVIEW_DATE) <= '$date_to'";
+            }
+
+            if (isset($_GET['municipality']) && !empty($_GET['municipality'])) {
+                $municipality = $_GET['municipality'];
+                $where[] = "a.MUNICIPALITY = '$municipality'";
+            }
+
+            if (isset($_GET['school']) && !empty($_GET['school'])) {
+                $school = $_GET['school'];
+                $where[] = "a.SCHOOL = '$school'";
             }
             
             $where_clause = !empty($where) ? "WHERE " . implode(" AND ", $where) : "";
@@ -216,3 +250,13 @@ global $mydb;
         </tbody>
     </table>
 </div>
+
+<script src="<?php echo web_root; ?>plugins/jQuery/jQuery-2.1.4.min.js"></script>
+<script>
+$(document).ready(function() {
+    $('#dash-table').DataTable({
+        "pageLength": 25,
+        "order": [[0, "desc"]]
+    });
+});
+</script>

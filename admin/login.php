@@ -13,6 +13,8 @@ if(isset($_SESSION['ADMIN_USERID'])){
     <title>ISEASP | Admin Login</title>
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
     
+    <!-- Favicon -->
+    <link rel="icon" href="<?php echo web_root; ?>uploads/iseasp_logo.ico" type="image/png">
     <!-- Bootstrap 3.3.5 -->
     <link rel="stylesheet" href="<?php echo web_root;?>bootstrap/css/bootstrap.min.css">
     <!-- Font Awesome -->
@@ -99,7 +101,7 @@ if(isset($_SESSION['ADMIN_USERID'])){
             left: 0;
             right: 0;
             height: 5px;
-            background: linear-gradient(90deg, #27ae60, #2ecc71, #27ae60);
+            background-color: #2d4281;
         }
         
         .login-header {
@@ -130,7 +132,7 @@ if(isset($_SESSION['ADMIN_USERID'])){
             left: 15px;
             top: 50%;
             transform: translateY(-50%);
-            color: #27ae60;
+            color: #2d4281;
             font-size: 16px;
             z-index: 10;
         }
@@ -146,7 +148,7 @@ if(isset($_SESSION['ADMIN_USERID'])){
         }
         
         .form-control:focus {
-            border-color: #27ae60;
+            border-color: #2d4281;
             box-shadow: 0 0 0 4px rgba(39, 174, 96, 0.1);
             outline: none;
         }
@@ -167,7 +169,7 @@ if(isset($_SESSION['ADMIN_USERID'])){
         }
         
         .btn-login {
-            background: linear-gradient(135deg, #27ae60, #219a52);
+            background-color: #2d4281;
             color: white;
             border: none;
             padding: 12px;
@@ -183,7 +185,7 @@ if(isset($_SESSION['ADMIN_USERID'])){
         .btn-login:hover {
             transform: translateY(-2px);
             box-shadow: 0 10px 25px rgba(39, 174, 96, 0.3);
-            background: linear-gradient(135deg, #219a52, #27ae60);
+            background-color: #7381AB;
         }
         
         .btn-login:active {
@@ -208,7 +210,7 @@ if(isset($_SESSION['ADMIN_USERID'])){
         }
         
         .login-footer a {
-            color: #27ae60;
+            color: #2d4281;
             text-decoration: none;
             font-weight: 500;
         }
@@ -320,7 +322,7 @@ if(isset($_SESSION['ADMIN_USERID'])){
 <body class="hold-transition login-page">
     <div class="login-box">
         <div class="login-logo text-center">
-            <a href="#" style="color: #28a745;">
+            <a href="#" style="color: #2d4281;">
                 <img src="../uploads/iseasp_logo.png" alt="ISEASP Logo" width="40" height="40" class="d-inline-block align-text-top"> ISEASP
             </a>
             <p>Ilocos Sur Educational Assistance & Scholarship Program</p>
@@ -355,7 +357,7 @@ if(isset($_SESSION['ADMIN_USERID'])){
                         </div>
                     </div>
                     <div class="col-xs-5 text-right">
-                        <a href="#" style="color: #27ae60; font-size: 12px;">Forgot Password?</a>
+                        <a href="#" style="color: #2d4281; font-size: 12px;">Forgot Password?</a>
                     </div>
                 </div>
                 
@@ -524,11 +526,11 @@ if(isset($_SESSION['ADMIN_USERID'])){
         }
         
         .form-group.focused .input-icon {
-            color: #27ae60;
+            color: #2d4281;
         }
         
         .form-group .form-control:focus + .input-icon {
-            color: #27ae60;
+            color: #2d4281;
         }
         
         .password-toggle {
@@ -536,7 +538,7 @@ if(isset($_SESSION['ADMIN_USERID'])){
         }
         
         .password-toggle:hover {
-            color: #27ae60 !important;
+            color: #2d4281 !important;
         }
         
         /* Remove number input arrows */

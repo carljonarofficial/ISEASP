@@ -5,7 +5,7 @@ if (!isset($_SESSION['ADMIN_USERID'])) {
 ?>
 
 <!-- Summary Stats -->
-<div class="row">
+<!-- <div class="row">
     <div class="col-lg-3 col-xs-6">
         <div class="small-box bg-green">
             <div class="inner">
@@ -74,7 +74,7 @@ if (!isset($_SESSION['ADMIN_USERID'])) {
             </div>
         </div>
     </div>
-</div>
+</div> -->
 
 <!-- Filter Section -->
 <div class="row">

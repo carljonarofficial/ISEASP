@@ -27,16 +27,16 @@
     <link rel="stylesheet" href="<?php echo web_root;?>plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css">
     <!-- Custom CSS -->
     <style>
-        .skin-green .main-header .navbar {
+        .skin-blue .main-header .navbar {
             background-color: #3E64D6;
         }
-        .skin-green .main-header .logo {
+        .skin-blue .main-header .logo {
             background-color: #29428E;
             color: #fff;
             border-bottom: 0 solid transparent;
         }
-        .skin-green .main-header .logo:hover {
-            background-color: #7081B3;
+        .skin-blue .main-header .logo:hover {
+            background-color: #367FA9;
         }
         .profile-img {
             width: 110px;
@@ -71,7 +71,7 @@
     </style>
 </head>
 
-<body class="hold-transition skin-green fixed sidebar-mini">
+<body class="hold-transition skin-blue fixed sidebar-mini">
     <div class="wrapper">
 
         <!-- Header -->
@@ -348,6 +348,7 @@
                         </ul>
                     </li>
                 </ul>
+
             </section>
         </aside>
 
@@ -387,7 +388,9 @@
 
         <!-- Footer -->
         <footer class="main-footer">
-            
+            <!-- PGIS and One Ilocos Sur Logo -->
+            <img src="<?php echo web_root; ?>uploads/pgis_logo.png" alt="PGIS Logo" style="height: 40px;">
+            <img src="<?php echo web_root; ?>uploads/oneilocossur_logo.png" alt="One Ilocos Sur Logo" style="height: 40px;">
             <strong>&copy; <?php echo date('Y'); ?> Provincial Government of Ilocos Sur - ISEASP. All rights reserved.</strong>
         </footer>
     </div>
