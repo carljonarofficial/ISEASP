@@ -140,11 +140,11 @@ $school_year = isset($_GET['school_year']) ? $_GET['school_year'] : '';
                     <i class="fa fa-user-plus"></i> New Applicants
                 </a>
             </li>
-            <li role="presentation" class="<?php echo ($stage == 'requirements') ? 'active' : ''; ?>">
+            <!-- <li role="presentation" class="<?php echo ($stage == 'requirements') ? 'active' : ''; ?>">
                 <a href="index.php?stage=requirements" class="tab-link">
                     <i class="fa fa-file-text"></i> Missing Requirements
                 </a>
-            </li>
+            </li> -->
             <li role="presentation" class="<?php echo ($stage == 'exam_slip') ? 'active' : ''; ?>">
                 <a href="index.php?stage=exam_slip" class="tab-link">
                     <i class="fa fa-ticket"></i> Exam Slip
