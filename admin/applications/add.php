@@ -753,7 +753,7 @@ textarea.form-control {
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Sex <span style="color:red;">*</span></span></label>
+                        <label>Gender <span style="color:red;">*</span></span></label>
                         <select name="GENDER" class="form-control" required>
                             <option value="">SELECT</option>
                             <option value="Male">MALE</option>

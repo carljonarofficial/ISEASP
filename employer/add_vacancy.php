@@ -52,7 +52,7 @@ $employerID = $_SESSION['EMPLOYER_ID'];
 
     <div class="row mb-3">
       <div class="col-md-6">
-        <label class="form-label">Preferred Sex</label>
+        <label class="form-label">Preferred Gender</label>
         <select name="preferred_sex" class="form-select">
           <option value="Male">Male</option>
           <option value="Female">Female</option>

@@ -63,7 +63,7 @@ $row = $result->fetch_assoc();
             <p><strong>Address:</strong> <?php echo $row['ADDRESS']; ?></p>
           </div>
           <div class="col-md-6">
-            <p><strong>Sex:</strong> <?php echo $row['SEX']; ?></p>
+            <p><strong>Gender:</strong> <?php echo $row['SEX']; ?></p>
             <p><strong>Civil Status:</strong> <?php echo $row['CIVILSTATUS']; ?></p>
             <p><strong>Birthdate:</strong> <?php echo $row['BIRTHDATE']; ?></p>
             <p><strong>Birthplace:</strong> <?php echo $row['BIRTHPLACE']; ?></p>

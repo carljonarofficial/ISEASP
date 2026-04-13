@@ -61,7 +61,7 @@
         </div>
 
         <div class="form-group">
-          <label class="col-sm-3 control-label">Sex</label>
+          <label class="col-sm-3 control-label">Gender</label>
           <div class="col-sm-9">
             <label class="radio-inline">
               <input type="radio" name="optionsRadios" value="Female" <?php if($appl->SEX == "Female") echo "checked"; ?>> Female

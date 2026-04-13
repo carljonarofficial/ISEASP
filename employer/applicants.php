@@ -54,7 +54,7 @@ $degrees = $conn->query("SELECT DISTINCT DEGREE FROM tblapplicants WHERE DEGREE 
           <th>Full Name</th>
           <th>Degree</th>
           <th>Age</th>
-          <th>Sex</th>
+          <th>Gender</th>
           <th>Status</th>
           <th>Contact</th>
           <th>Email</th>

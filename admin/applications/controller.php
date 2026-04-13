@@ -47,26 +47,26 @@ function doInsert() {
     if (isset($_POST['save'])) {
 
         // REQUIRED FIELDS VALIDATION
-        if (
-            empty($_POST['FIRSTNAME']) ||
-            empty($_POST['LASTNAME']) ||
-            empty($_POST['COURSE']) ||
-            empty($_POST['SCHOOL']) ||
-            empty($_POST['YEARLEVEL']) ||
-            empty($_POST['CONTACT']) ||
-            empty($_POST['EMAIL']) ||
-            empty($_POST['DISTRICT']) ||
-            empty($_POST['MUNICIPALITY']) ||
-            empty($_POST['ID_NUMBER']) ||
-            empty($_POST['PERM_STREET']) ||
-            empty($_POST['PERM_BARANGAY']) ||
-            empty($_POST['PERM_MUNICIPALITY']) ||
-            empty($_POST['PERM_PROVINCE'])
-        ) {
-            message("All required fields must be filled out!", "error");
-            redirect("index.php?view=add");
-            exit;
-        }
+        // if (
+        //     empty($_POST['FIRSTNAME']) ||
+        //     empty($_POST['LASTNAME']) ||
+        //     empty($_POST['COURSE']) ||
+        //     empty($_POST['SCHOOL']) ||
+        //     empty($_POST['YEARLEVEL']) ||
+        //     empty($_POST['CONTACT']) ||
+        //     empty($_POST['EMAIL']) ||
+        //     empty($_POST['DISTRICT']) ||
+        //     empty($_POST['MUNICIPALITY']) ||
+        //     empty($_POST['ID_NUMBER']) ||
+        //     empty($_POST['PERM_STREET']) ||
+        //     empty($_POST['PERM_BARANGAY']) ||
+        //     empty($_POST['PERM_MUNICIPALITY']) ||
+        //     empty($_POST['PERM_PROVINCE'])
+        // ) {
+        //     message("All required fields must be filled out!", "error");
+        //     redirect("index.php?view=add");
+        //     exit;
+        // }
 
         $created_by   = (int) $_SESSION['ADMIN_USERID'];
 
@@ -196,7 +196,7 @@ function doInsert() {
         $result = $mydb->executeQuery();
 
         if (!$result) {
-            die("SQL ERROR: " . $mydb->getLastError());
+            // die("SQL ERROR: " . $mydb->getLastError());
         }
 
         $applicant_id = $mydb->insert_id();
