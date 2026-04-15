@@ -22,6 +22,9 @@ if (!$applicant) {
 
 // Handle form submission
 if (isset($_POST['update_checklist'])) {
+    // Get Total requirements for validation
+    
+
     foreach ($_POST['requirements'] as $req_id => $values) {
         $is_submitted = isset($values['submitted']) ? 1 : 0;
         $is_verified = isset($values['verified']) ? 1 : 0;

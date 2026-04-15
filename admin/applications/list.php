@@ -231,28 +231,20 @@ $school_year = isset($_GET['school_year']) ? $_GET['school_year'] : '';
     <div id="print-section">
         <div class="table-responsive">					
             <table id="dash-table" class="table table-striped table-bordered table-hover" style="font-size:13px; width:100%; border-collapse: collapse;">
-<thead>
+                <thead>
                     <tr>
                         <th width="3%" class="no-print" style="text-align: center;"><input type="checkbox" id="chkAll"></th>
-                        <th data-priority="1">LRN/ID</th>
-                        <th data-priority="1">Full Name</th>
-                        <th>Municipality</th>
-                        <th data-priority="2">School</th>
-                        <th data-priority="3">Course</th>
-                        <th data-priority="3">Year</th>
-                        <th data-priority="2">Exam Status</th>
-                        <th data-priority="2">Status</th>
-                        <th width="18%" class="no-print" data-priority="10001">Actions</th>
+                        <th data-priority="1">Applicant Name</th>
+                        <th data-priority="2">Municipality</th>
+                        <th data-priority="3">School</th>
+                        <th data-priority="4">Applicant Type</th>
+                        <th data-priority="5">Pipeline Stage</th>
+                        <th data-priority="6">GWA</th>
+                        <th width="18%" class="no-print" data-priority="7">Actions</th>
                     </tr>	
                 </thead>
                 <?php
                 $where = array();
-                
-                // CRITICAL FIX: Only show new applicants, exclude scholars and graduates
-                // By default, exclude scholars, graduates, and terminated
-                if ($stage != 'scholar' && $stage != 'qualified') {
-                    $where[] = "a.STATUS NOT IN ('Scholar', 'Graduated', 'Terminated')";
-                }
                 
                 if (!empty($school_year)) {
                     $where[] = "a.SCHOOL_YEAR = '$school_year'";
@@ -299,7 +291,7 @@ $school_year = isset($_GET['school_year']) ? $_GET['school_year'] : '';
                     $where[] = "a.MUNICIPALITY = '$municipality'";
                 }
                 
-                $where_clause = !empty($where) ? "WHERE " . implode(" AND ", $where) : "WHERE a.STATUS NOT IN ('Scholar', 'Graduated', 'Terminated')";
+                $where_clause = !empty($where) ? "WHERE " . implode(" AND ", $where) : "";
                 
                 $mydb->setQuery("
                     SELECT 
@@ -307,15 +299,35 @@ $school_year = isset($_GET['school_year']) ? $_GET['school_year'] : '';
                         u.FULLNAME AS CREATED_BY,
                         (SELECT COUNT(*) FROM tbl_applicant_requirement_checklist 
                          WHERE APPLICANTID = a.APPLICANTID AND IS_VERIFIED = 1) AS VERIFIED_REQ,
-                        (SELECT COUNT(*) FROM tbl_requirement) AS TOTAL_REQ
+                        (SELECT COUNT(*) FROM tbl_requirement) AS TOTAL_REQ,
+                        (SELECT COUNT(*) FROM tbl_requirement WHERE REQUIRED = 'Yes') AS TOTAL_REQUIRED_REQ,
+                        (SELECT COUNT(*) FROM tbl_requirement WHERE REQUIRED = 'No') AS TOTAL_OPTIONAL_REQ
                     FROM tbl_applicants a
                     LEFT JOIN tblusers u ON a.CREATED_BY = u.USERID
                     $where_clause
-                    ORDER BY a.DATECREATED DESC
+                    ORDER BY a.LASTNAME ASC
                 ");
 
                 $applicants = $mydb->loadResultList();
                 
+                function getApplicantTypeColor($type) {
+                    switch($type) {
+                        case 'New ': return 'primary';
+                        case 'Applicant': return 'info';
+                        case 'Renewal': return 'warning';
+                        default: return 'default';
+                    }
+                }
+
+                function getRequirementStatusColor($requirement_status) {
+                    switch($requirement_status) {
+                        case 'Complete': return 'success';
+                        case 'Incomplete': return 'danger';
+                        default: return 'default';
+                    }
+                    
+                }
+
                 function getStageBadge($applicant) {
                     if($applicant->STATUS == 'Scholar') return 'stage-scholar';
                     if($applicant->STATUS == 'Qualified') return 'stage-qualified';
@@ -355,18 +367,28 @@ $school_year = isset($_GET['school_year']) ? $_GET['school_year'] : '';
                     if(!empty($applicant->EXAM_SLIP_GENERATED)) return 'Exam Slip Generated';
                     return 'New Applicant';
                 }
+
+                function abbreviateSchool($school) {
+                    $abbreviations = [
+                        'UNIVERSITY OF NORTHERN PHILIPPINES' => 'UNP',
+                        'ILOCOS SUR COMMUNITY COLLEGE' => 'ISCC',
+                        'ILOCOS SUR POLYTECHNIC STATE COLLEGE/UNIVERSITY OF ILOCOS PHILIPPINES' => 'ISPSC/UIP',
+                        'ST. PAUL COLLEGE OF ILOCOS SUR' => 'SPCIS',
+                        'DIVINE WORLD COLLEGE OF VIGAN' => 'DWCV',
+                        'IMMACULATE CONCEPTION SCHOOL OF THEOLOGY' => 'ICST'
+                        // Add more as needed
+                    ];
+                    foreach ($abbreviations as $full => $abbr) {
+                        $school = str_replace($full, $abbr, $school);
+                    }
+                    return $school;
+                }
                 ?>
 
                 <tbody>
                     <?php 
                     $has_applicants = false;
                     foreach ($applicants as $a): 
-                        // Skip scholars, graduates, and terminated if not specifically selected
-                        if ($stage != 'scholar' && $stage != 'qualified') {
-                            if (in_array($a->STATUS, ['Scholar', 'Graduated', 'Terminated'])) {
-                                continue;
-                            }
-                        }
                         $has_applicants = true;
                         
                         $stageClass = getStageBadge($a);
@@ -386,30 +408,25 @@ $school_year = isset($_GET['school_year']) ? $_GET['school_year'] : '';
                         
                         $verified_req = isset($a->VERIFIED_REQ) ? $a->VERIFIED_REQ : 0;
                         $total_req = isset($a->TOTAL_REQ) ? $a->TOTAL_REQ : 13;
+                        $total_required_req = isset($a->TOTAL_REQUIRED_REQ) ? $a->TOTAL_REQUIRED_REQ : 0;
+                        $total_optional_req = isset($a->TOTAL_OPTIONAL_REQ) ? $a->TOTAL_OPTIONAL_REQ : 0;
                         $req_percentage = ($total_req > 0) ? round(($verified_req / $total_req) * 100) : 0;
                         
                         $req_status_color = ($verified_req == $total_req) ? 'success' : 'warning';
                     ?>
                     <tr onclick="viewApplicant(<?= $a->APPLICANTID ?>)" style="cursor: pointer;">
                         <td class="no-print" onclick="event.cancelBubble=true; event.stopPropagation();"><input type="checkbox" name="selector[]" value="<?= $a->APPLICANTID ?>"></td>
-                        <td><?= htmlspecialchars($a->LRN ?? 'N/A') ?></td>
                         <td>
                             <strong><?= htmlspecialchars($a->LASTNAME . ', ' . $a->FIRSTNAME . ' ' . ($a->MIDDLENAME ?? '')) ?></strong>
-                            <div style="margin-top: 3px;">
-                                <?php if(isset($a->IS_4PS_BENEFICIARY) && $a->IS_4PS_BENEFICIARY == 'Yes'): ?>
-                                    <span class="label label-success status-badge" title="4Ps Beneficiary">4Ps</span>
-                                <?php endif; ?>
-                                <?php if(isset($a->IS_INDIGENOUS) && $a->IS_INDIGENOUS == 'Yes'): ?>
-                                    <span class="label label-info status-badge" title="Indigenous People">IP</span>
-                                <?php endif; ?>
-                            </div>
                         </td>
-                        <td><?= htmlspecialchars($a->MUNICIPALITY ?? 'N/A') ?></td>
-                        <td><?= htmlspecialchars($a->SCHOOL ?? 'N/A') ?></td>
-                        <td><?= htmlspecialchars($a->COURSE ?? 'N/A') ?></td>
-                        <td><?= htmlspecialchars($a->YEARLEVEL ?? 'N/A') ?></td>
-                        <td><span class="label <?= $examColor ?> status-badge"><?= $examStatus ?></span></td>
-                        <td><span class="label label-<?= getStatusColor($a->STATUS) ?> status-badge"><?= $a->STATUS ?? 'Pending' ?></span></td>
+                        <td><?= htmlspecialchars(abbreviateSchool($a->MUNICIPALITY ?? 'N/A')) ?></td>
+                        <td><?= htmlspecialchars(abbreviateSchool($a->SCHOOL ?? 'N/A')) ?></td>
+                        <td><span class="label label-<?= getApplicantTypeColor($a->APPLICATION_TYPE) ?> status-badge"><?= $a->APPLICATION_TYPE ?? 'New' ?></span></td>
+                        <td>
+                            <span class="label label-<?= getRequirementStatusColor($a->REQUIREMENT_STATUS) ?> status-badge""><?= $a->REQUIREMENT_STATUS?></span>
+                            <span class="label label-<?= getStatusColor($a->STATUS) ?> status-badge"><?= $a->STATUS ?? 'Pending' ?></span>
+                        </td>
+                        <td><?= $a->GPA ?></td>
                         <td class="text-center no-print" onclick="event.cancelBubble=true; event.stopPropagation();">
                             <div class="action-buttons">
                                 <a href="./index.php?view=view&id=<?= $a->APPLICANTID ?>" 
@@ -552,10 +569,6 @@ jQuery(document).ready(function() {
         "order": [[1, "asc"]],
         "pageLength": 25,
 "columnDefs": [
-            { "orderable": false, "targets": [0, 9] },
-            { "width": "5%", "targets": 0 },
-            { "width": "15%", "targets": [1,2,3] },
-            { "width": "10%", "targets": [4,5,6,7,8] },
             { 
                 "targets": "_all",
                 "defaultContent": "N/A"
