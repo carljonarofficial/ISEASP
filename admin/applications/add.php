@@ -730,13 +730,10 @@ textarea.form-control {
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Learner Reference Number (LRN) (For Incoming 1st Year College Students) <span style="color:red;">*</span></span></label>
-                        <input type="text" name="LRN" class="form-control" required placeholder="12-DIGIT LRN" maxlength="12" pattern="[0-9]{12}">
+                        <label>SCHOOL ID NUMBER <span style="color:red;">*</span></span></label>
+                        <input type="text" name="LRN" class="form-control" required placeholder="ID NUMBER">
                     </div>
-                    <div class="form-group">
-                        <label>ID Number (For Current College Students)  <span style="color:red;">*</span></span></label>
-                        <input type="text" name="ID_NUMBER" class="form-control" required placeholder="Enter Unique ID Number">
-                    </div>
+                    <input type="hidden" name="ID_NUMBER">
                     <div class="form-group">
                         <label>Birthdate <span style="color:red;">*</span></span></label>
                         <input type="date" name="BIRTHDATE" class="form-control" required onchange="calculateAge(this)">
@@ -1508,9 +1505,9 @@ document.querySelectorAll('input[type="text"], textarea').forEach(function(input
     });
 });
 
-// Validate LRN
+// Duplicate LRN to ID_NUMBER
 document.querySelector('input[name="LRN"]').addEventListener('input', function() {
-    this.value = this.value.replace(/[^0-9]/g, '').slice(0, 12);
+    document.querySelector('input[name="ID_NUMBER"]').value = this.value;
 });
 
 // Smooth scroll to top on submit

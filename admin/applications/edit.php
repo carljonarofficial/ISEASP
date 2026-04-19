@@ -95,7 +95,7 @@ $logs = $mydb->loadResultList();
                     </div>
                     
                     <div class="form-group">
-                        <label class="col-md-2 control-label">LRN:</label>
+                        <label class="col-md-2 control-label">School ID Number:</label>
                         <div class="col-md-4">
                             <input class="form-control input-sm" name="LRN" value="<?php echo htmlspecialchars($app->LRN); ?>" maxlength="12" pattern="[0-9]{0,12}">
                         </div>

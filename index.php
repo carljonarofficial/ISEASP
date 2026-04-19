@@ -572,13 +572,11 @@ require_once("include/initialize.php");
                     <!-- Status Check Card -->
                     <div class="status-card">
                         <h3><i class="fas fa-search"></i> Check Your Status</h3>
-                        <p>Enter your 12-digit Learner Reference Number (LRN) for Incoming 1st Year College Students or your ID Number for Current College Students.</p>
                         
                         <div class="lrn-input-group">
                             <i class="fas fa-id-card"></i>
                             <input type="text" class="lrn-input" id="lrnInput" 
-                                   placeholder="Enter 12-digit LRN or ID Number" maxlength="12" 
-                                   pattern="[0-9]{12}" inputmode="numeric">
+                                   placeholder="Enter your ID Number" inputmode="numeric">
                         </div>
                         
                         <button class="btn-check" id="checkBtn" type="button">
@@ -675,9 +673,9 @@ require_once("include/initialize.php");
         });
         
         // Allow only numbers in LRN input
-        $('#lrnInput').on('input', function() {
-            this.value = this.value.replace(/[^0-9]/g, '').slice(0, 12);
-        });
+        // $('#lrnInput').on('input', function() {
+        //     this.value = this.value.replace(/[^0-9]/g, '').slice(0, 12);
+        // });
     });
 
     function checkStatus() {

@@ -106,7 +106,7 @@ $logs = $mydb->loadResultList();
                                 <td><strong><?= htmlspecialchars($applicant->LASTNAME . ', ' . $applicant->FIRSTNAME . ' ' . ($applicant->MIDDLENAME ?? '') . ' ' . ($applicant->SUFFIX ?? '')) ?></strong></td>
                             </tr>
                             <tr>
-                                <th>LRN (Learner Ref. No.):</th>
+                                <th>School ID Number:</th>
                                 <td><?= htmlspecialchars($applicant->LRN ?? 'N/A') ?></td>
                             </tr>
                             <tr>
