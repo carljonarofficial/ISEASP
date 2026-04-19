@@ -682,10 +682,10 @@ require_once("include/initialize.php");
         var lrn = $('#lrnInput').val().trim();
         
         // Validate LRN
-        if (lrn.length !== 12 || !/^\d+$/.test(lrn)) {
-            showError('Please enter a valid 12-digit LRN');
-            return;
-        }
+        // if (lrn.length !== 12 || !/^\d+$/.test(lrn)) {
+        //     showError('Please enter a valid 12-digit LRN');
+        //     return;
+        // }
         
         // Show loading state
         var btn = $('#checkBtn');
