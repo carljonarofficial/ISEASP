@@ -11,10 +11,10 @@ if (!isset($_POST['lrn']) || empty($_POST['lrn'])) {
 $lrn = trim($_POST['lrn']);
 
 // Validate LRN format (12 digits)
-if (!preg_match('/^\d{12}$/', $lrn)) {
-    echo json_encode(['status' => 'error', 'message' => 'Invalid LRN format. Please enter a valid 12-digit LRN.']);
-    exit;
-}
+// if (!preg_match('/^\d{12}$/', $lrn)) {
+//     echo json_encode(['status' => 'error', 'message' => 'Invalid LRN format. Please enter a valid 12-digit LRN.']);
+//     exit;
+// }
 
 global $mydb;
 
