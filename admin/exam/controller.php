@@ -142,7 +142,7 @@ function doInsert() {
         $mydb->executeQuery();
         
         message("Exam result saved successfully! " . ($exam_status == 'Passed' ? "Interview has been scheduled." : ""), "success");
-        redirect("index.php?view=results");
+        redirect("../applications/index.php?stage=exam");
     }
 }
 
@@ -163,7 +163,7 @@ function doEdit() {
         
         if (!$result) {
             message("Exam result not found!", "error");
-            redirect("index.php?view=results");
+            redirect("../applications/index.php");
             return;
         }
         
@@ -265,7 +265,7 @@ function doEdit() {
         $mydb->executeQuery();
         
         message("Exam result updated successfully!", "success");
-        redirect("index.php?view=results");
+        redirect("../applications/index.php?stage=exam");
     }
 }
 
@@ -282,7 +282,7 @@ function doDelete() {
         
         if (!$result) {
             message("Exam result not found!", "error");
-            redirect("index.php?view=results");
+            redirect("../applications/index.php");
             return;
         }
         
@@ -325,7 +325,7 @@ function doDelete() {
         $mydb->executeQuery();
         
         message("Exam result deleted successfully!", "success");
-        redirect("index.php?view=results");
+        redirect("../applications/index.php?stage=exam");
     }
 }
 
@@ -386,10 +386,10 @@ function doBatchDelete() {
         }
         
         message("$deleted_count exam result(s) deleted successfully!", "success");
-        redirect("index.php?view=results");
+        redirect("../applications/index.php?stage=exam");
     } else {
         message("No exam results selected for deletion!", "error");
-        redirect("index.php?view=results");
+        redirect("../applications/index.php");
     }
 }
 
@@ -463,7 +463,7 @@ function doBatchExport() {
         exit();
     } else {
         message("No exam results selected for export!", "error");
-        redirect("index.php?view=results");
+        redirect("../applications/index.php");
     }
 }
 
@@ -569,7 +569,7 @@ function doBatchPrint() {
         exit();
     } else {
         message("No exam results selected for printing!", "error");
-        redirect("index.php?view=results");
+        redirect("../applications/index.php");
     }
 }
 
@@ -777,10 +777,10 @@ function doBatchAddEdit() {
             message("No exam results were processed. Please check your input.", "error");
         }
 
-        redirect("index.php?view=results");
+        redirect("../applications/index.php?stage=exam");
     } else {
         message("No applicants selected or invalid data provided!", "error");
-        redirect("index.php?view=batch_add");
+        redirect("../applications/index.php");
     }
 }
 
@@ -837,10 +837,10 @@ function doBatchCancelExams() {
             message("No exams were cancelled. Please try again.", "error");
         }
 
-        redirect("index.php?view=results");
+        redirect("../applications/index.php?stage=exam_slip");
     } else {
         message("No applicants selected for cancellation!", "error");
-        redirect("index.php?view=results");
+        redirect("../applications/index.php");
     }
 }
 
@@ -902,10 +902,10 @@ function doBatchReschedule() {
             message("No exams were rescheduled. Please try again.", "error");
         }
 
-        redirect("index.php?view=results");
+        redirect("../applications/index.php?stage=exam_slip");
     } else {
         message("No applicants selected or invalid schedule data provided!", "error");
-        redirect("index.php?view=batch_reschedule");
+        redirect("../applications/index.php");
     }
 }
 
@@ -1109,7 +1109,7 @@ function doBatchSummaryReport() {
         exit();
     } else {
         message("No applicants selected for report!", "error");
-        redirect("index.php?view=schedule");
+        redirect("../applications/index.php");
     }
 }
 ?>

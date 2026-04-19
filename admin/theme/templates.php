@@ -34,16 +34,18 @@
             background-color: #29428E;
             color: #fff;
             border-bottom: 0 solid transparent;
+            font-weight: 700;
         }
         .skin-blue .main-header .logo:hover {
-            background-color: #367FA9;
+            background-color: #1e336e;
         }
         .profile-img {
             width: 110px;
             height: 110px;
             object-fit: cover;
-            border: 3px solid #27ae60;
+            border: 3px solid #4e73df;
             padding: 3px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
         .badge-notification {
             background-color: #e74c3c;
@@ -52,8 +54,9 @@
             right: 8px;
         }
         .sidebar-menu > li.active > a {
-            border-left-color: #27ae60;
-            background: rgba(39, 174, 96, 0.1);
+            border-left-color: #4e73df;
+            background: rgba(78, 115, 223, 0.1) !important;
+            color: #4e73df !important;
         }
         .content-header {
             background: #ecf0f5;
@@ -61,13 +64,18 @@
             border-bottom: 1px solid #d2d6de;
         }
         .box {
-            border-top-color: #27ae60;
+            border-top-color: #3E64D6;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
         @media (min-width: 768px) {
             .sidebar-mini.sidebar-collapse .main-header .logo {
                 padding-left: 6px;
             }
         }
+        /* Button and UI refinement */
+        .btn-success { background-color: #4e73df; border-color: #2e59d9; }
+        .btn-success:hover { background-color: #2e59d9; border-color: #2653d4; }
+        .bg-green { background-color: #4e73df !important; }
     </style>
 </head>
 
@@ -148,7 +156,7 @@
         <div class="modal fade" id="changePasswordModal" tabindex="-1" role="dialog">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
-                    <div class="modal-header" style="background-color: #27ae60; color: white;">
+                    <div class="modal-header" style="background-color: #3E64D6; color: white;">
                         <button type="button" class="close" data-dismiss="modal" style="color: white;">&times;</button>
                         <h4 class="modal-title"><i class="fa fa-key"></i> Change Password</h4>
                     </div>
@@ -207,11 +215,11 @@
                     <li class="header">MAIN NAVIGATION</li>
 
                     <!-- Dashboard -->
-                    <li class="<?php echo (basename($_SERVER['PHP_SELF']) == 'index.php') ? "active" : "";?>">
+                    <li class="<?php echo (basename($_SERVER['PHP_SELF']) == 'index.php' && strpos($_SERVER['REQUEST_URI'], 'applications') === false && strpos($_SERVER['REQUEST_URI'], 'checklist') === false && strpos($_SERVER['REQUEST_URI'], 'municipalities') === false && strpos($_SERVER['REQUEST_URI'], 'system') === false) ? "active" : "";?>">
                         <a href="<?php echo web_root;?>admin/">
                             <i class="fa fa-dashboard"></i> <span>Dashboard</span>
                             <span class="pull-right-container">
-                                <small class="label pull-right bg-green">Home</small>
+                                <small class="label pull-right bg-blue">Home</small>
                             </span>
                         </a>
                     </li>
@@ -227,12 +235,13 @@
                         <ul class="treeview-menu">
                             <li><a href="<?php echo web_root;?>admin/applications/"><i class="fa fa-circle-o"></i> All Applicants</a></li>
                             <li><a href="<?php echo web_root;?>admin/applications/index.php?view=add"><i class="fa fa-circle-o"></i> Add New Applicant</a></li>
-                            <li><a href="<?php echo web_root;?>admin/checklist/"><i class="fa fa-circle-o"></i> Applicant Checklist</a></li>
+                            <!-- <li><a href="<?php echo web_root;?>admin/checklist/"><i class="fa fa-circle-o"></i> Applicant Checklist</a></li> -->
+                            <li><a href="<?php echo web_root;?>admin/scholars/index.php?view=payroll"><i class="fa fa-money"></i> Payroll Management</a></li>
                         </ul>
                     </li>
 
                     <!-- Examination -->
-                    <li class="treeview <?php echo (strpos($_SERVER['REQUEST_URI'], 'exam') !== false) ? "active" : "";?>">
+                    <!-- <li class="treeview <?php echo (strpos($_SERVER['REQUEST_URI'], 'exam') !== false) ? "active" : "";?>">
                         <a href="#">
                             <i class="fa fa-pencil-square-o"></i> <span>Examination</span>
                             <span class="pull-right-container">
@@ -243,10 +252,10 @@
                             <li><a href="<?php echo web_root;?>admin/exam/index.php?view=schedule"><i class="fa fa-circle-o"></i> Exam Schedule</a></li>
                             <li><a href="<?php echo web_root;?>admin/exam/index.php?view=results"><i class="fa fa-circle-o"></i> Exam Results</a></li>
                         </ul>
-                    </li>
+                    </li> -->
 
                     <!-- Interview -->
-                    <li class="treeview <?php echo (strpos($_SERVER['REQUEST_URI'], 'interview') !== false) ? "active" : "";?>">
+                    <!-- <li class="treeview <?php echo (strpos($_SERVER['REQUEST_URI'], 'interview') !== false) ? "active" : "";?>">
                         <a href="#">
                             <i class="fa fa-comments-o"></i> <span>Interview</span>
                             <span class="pull-right-container">
@@ -257,10 +266,10 @@
                             <li><a href="<?php echo web_root;?>admin/interview/index.php?view=schedule"><i class="fa fa-circle-o"></i> Interview Schedule</a></li>
                             <li><a href="<?php echo web_root;?>admin/interview/index.php?view=results"><i class="fa fa-circle-o"></i> Interview Results</a></li>
                         </ul>
-                    </li>
+                    </li> -->
 
                     <!-- Final Evaluation -->
-                    <li class="treeview <?php echo (strpos($_SERVER['REQUEST_URI'], 'evaluation') !== false) ? "active" : "";?>">
+                    <!-- <li class="treeview <?php echo (strpos($_SERVER['REQUEST_URI'], 'evaluation') !== false) ? "active" : "";?>">
                         <a href="#">
                             <i class="fa fa-gavel"></i> <span>Final Evaluation</span>
                             <span class="pull-right-container">
@@ -269,9 +278,8 @@
                         </a>
                         <ul class="treeview-menu">
                             <li><a href="<?php echo web_root;?>admin/evaluation/"><i class="fa fa-circle-o"></i> For Evaluation</a></li>
-                            <!-- <li><a href="<?php echo web_root;?>admin/evaluation/index.php?view=qualified"><i class="fa fa-circle-o"></i> Qualified</a></li> -->
                         </ul>
-                    </li>
+                    </li> -->
 
                     <!-- Qualified Applicants -->
                     <!-- <li class="treeview <?php echo (strpos($_SERVER['REQUEST_URI'], 'evaluation') !== false) ? "active" : "";?>">
@@ -287,7 +295,7 @@
                     </li> -->
 
                     <!-- Scholars -->
-                    <li class="treeview <?php echo (strpos($_SERVER['REQUEST_URI'], 'scholars') !== false) ? "active" : "";?>">
+                    <!-- <li class="treeview <?php echo (strpos($_SERVER['REQUEST_URI'], 'scholars') !== false) ? "active" : "";?>">
                         <a href="#">
                             <i class="fa fa-graduation-cap"></i> <span>Scholars</span>
                             <span class="pull-right-container">
@@ -300,10 +308,8 @@
                             <li><a href="<?php echo web_root;?>admin/scholars/index.php?view=graduates"><i class="fa fa-trophy"></i> Graduates</a></li>
                             <li class="divider"></li>
                             <li><a href="<?php echo web_root;?>admin/scholars/index.php?view=payroll"><i class="fa fa-money"></i> Payroll Management</a></li>
-                            <!-- <li><a href="<?php echo web_root;?>admin/scholars/index.php?view=disbursement"><i class="fa fa-credit-card"></i> Disbursement Records</a></li> -->
-                            <!-- <li><a href="<?php echo web_root;?>admin/scholars/index.php?view=payroll_reports"><i class="fa fa-bar-chart"></i> Payroll Reports</a></li> -->
                         </ul>
-                    </li>
+                    </li> -->
 
                     <!-- Municipalities -->
                     <li class="<?php echo (strpos($_SERVER['REQUEST_URI'], 'municipalities') !== false) ? "active" : "";?>">

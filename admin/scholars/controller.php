@@ -516,9 +516,14 @@ function renewScholar() {
 function renewMultipleScholars() {
     global $mydb;
     
-    $scholar_ids = isset($_POST['scholar_ids']) ? $_POST['scholar_ids'] : [];
+    $scholar_ids    = isset($_POST['scholar_ids']) ? $_POST['scholar_ids'] : [];
     $school_year_id = isset($_POST['school_year_id']) ? intval($_POST['school_year_id']) : 0;
-    
+    $school_year    = isset($_POST['school_year']) ? $_POST['school_year'] : '';
+    $semester       = isset($_POST['semester']) ? $_POST['semester'] : '';
+    $status         = isset($_POST['renewal_status']) ? $_POST['renewal_status'] : 'Approved';
+    $remarks        = isset($_POST['remarks']) ? trim($_POST['remarks']) : 'Batch renewal';
+    $admin_id       = $_SESSION['ADMIN_USERID'];
+
     if(!is_array($scholar_ids) || count($scholar_ids) == 0) {
         echo json_encode(['success' => false, 'message' => 'No scholars selected']);
         return;
@@ -528,31 +533,94 @@ function renewMultipleScholars() {
     $scholar_names = [];
     
     foreach($scholar_ids as $scholar_id) {
-        // Get scholar name for logging
-        $mydb->setQuery("SELECT CONCAT(LASTNAME, ', ', FIRSTNAME, ' ', IFNULL(MIDDLENAME, '')) as FULLNAME FROM tbl_applicants WHERE APPLICANTID = $scholar_id");
-        $mydb->executeQuery();
+        // Fetch scholar details to verify eligibility (Active Scholarship Award)
+        $sql = "
+            SELECT 
+                a.*, sa.AWARD_ID, sa.AMOUNT
+            FROM tbl_applicants a
+            INNER JOIN tbl_scholarship_awards sa ON a.APPLICANTID = sa.APPLICANTID
+            WHERE a.APPLICANTID = $scholar_id AND sa.STATUS = 'Active'
+        ";
+        $mydb->setQuery($sql);
         $scholar = $mydb->loadSingleResult();
-        if($scholar) {
-            $scholar_names[] = $scholar->FULLNAME;
-        }
         
-        $mydb->setQuery("SELECT id FROM tbl_scholar_renewals WHERE scholar_id = '$scholar_id' AND school_year_id = '$school_year_id'");
-        $mydb->executeQuery();
-        $result = $mydb->loadSingleResult();
+        if (!$scholar) continue;
+
+        $scholar_names[] = $scholar->LASTNAME . ', ' . $scholar->FIRSTNAME;
+        $gpa = $scholar->GPA ?? 0;
+
+        // 1. Check if renewal already exists in tbl_renewal_applications (Logic from renew.php)
+        $check_sql = "SELECT COUNT(*) as count FROM tbl_renewal_applications 
+                      WHERE APPLICANTID = $scholar_id 
+                      AND SCHOOL_YEAR = '$school_year' 
+                      AND SEMESTER = '$semester'";
+        $mydb->setQuery($check_sql);
+        $check = $mydb->loadSingleResult();
         
-        if($result) {
-            $mydb->setQuery("
-                UPDATE tbl_scholar_renewals 
-                SET status = 'approved', approved_by = '{$_SESSION['ADMIN_USERID']}', approved_date = NOW() 
-                WHERE scholar_id = '$scholar_id' AND school_year_id = '$school_year_id'
-            ");
-        } else {
-            $mydb->setQuery("
-                INSERT INTO tbl_scholar_renewals (scholar_id, school_year_id, status, approved_by, approved_date) 
-                VALUES ('$scholar_id', '$school_year_id', 'approved', '{$_SESSION['ADMIN_USERID']}', NOW())
-            ");
-        }
+        if ($check->count > 0) continue;
+
+        // 2. Insert into tbl_renewal_applications
+        $renew_sql = "INSERT INTO tbl_renewal_applications 
+                      (APPLICANTID, SCHOOL_YEAR, SEMESTER, PREVIOUS_GPA, UNITS_COMPLETED, STATUS, REVIEWED_BY, REVIEW_DATE, REMARKS)
+                      VALUES ($scholar_id, '$school_year', '$semester', $gpa, 24, '$status', $admin_id, NOW(), '$remarks')";
+        $mydb->setQuery($renew_sql);
         $mydb->executeQuery();
+
+        // 3. Update scholarship award and applicant details if approved
+        if ($status == 'Approved') {
+            $update_award = "UPDATE tbl_scholarship_awards SET 
+                             SCHOOL_YEAR = '$school_year',
+                             SEMESTER = '$semester'
+                             WHERE AWARD_ID = " . $scholar->AWARD_ID;
+            $mydb->setQuery($update_award);
+            $mydb->executeQuery();
+            
+            // Increment Year Level
+            $new_year = '';
+            switch ($scholar->YEARLEVEL) {
+                case '1st Year': $new_year = '2nd Year'; break;
+                case '2nd Year': $new_year = '3rd Year'; break;
+                case '3rd Year': $new_year = '4th Year'; break;
+                case '4th Year': $new_year = '5th Year'; break;
+                default: $new_year = $scholar->YEARLEVEL;
+            }
+            
+            $year_sql = "UPDATE tbl_applicants SET YEARLEVEL = '$new_year' WHERE APPLICANTID = $scholar_id";
+            $mydb->setQuery($year_sql);
+            $mydb->executeQuery();
+
+            // 4. Update tbl_scholar_renewals (Payroll Tracking logic)
+            $mydb->setQuery("SELECT id FROM tbl_scholar_renewals WHERE scholar_id = '$scholar_id' AND school_year_id = '$school_year_id'");
+            $res_renew = $mydb->loadSingleResult();
+            
+            if($res_renew) {
+                $mydb->setQuery("UPDATE tbl_scholar_renewals SET status = 'approved', approved_by = '$admin_id', approved_date = NOW() 
+                                 WHERE scholar_id = '$scholar_id' AND school_year_id = '$school_year_id'");
+            } else {
+                $mydb->setQuery("INSERT INTO tbl_scholar_renewals (scholar_id, school_year_id, status, approved_by, approved_date) 
+                                 VALUES ('$scholar_id', '$school_year_id', 'approved', '$admin_id', NOW())");
+            }
+            $mydb->executeQuery();
+        }
+
+        // 5. Insert into scholarship history
+        $history_sql = "INSERT INTO tbl_scholarship_history 
+                        (APPLICANTID, SCHOOL_YEAR, SEMESTER, STATUS, GPA, REMARKS, UPDATED_BY)
+                        VALUES ($scholar_id, '$school_year', '$semester', 'Renewed', $gpa, 'Bulk Renewal $status', $admin_id)";
+        $mydb->setQuery($history_sql);
+        $mydb->executeQuery();
+
+        // 6. Log activity
+        $log_sql = "INSERT INTO tbl_application_log 
+                    (APPLICANTID, USERID, USERNAME, USER_ROLE, ACTION, ACTION_TYPE, DETAILS)
+                    SELECT 
+                        $scholar_id, $admin_id, USERNAME, ROLE, 
+                        CONCAT('Bulk Scholarship renewed: ', '$status'), 'SCHOLAR',
+                        CONCAT('Renewal for: ', '$school_year', ' ', '$semester')
+                    FROM tblusers WHERE USERID = $admin_id";
+        $mydb->setQuery($log_sql);
+        $mydb->executeQuery();
+
         $success_count++;
     }
     

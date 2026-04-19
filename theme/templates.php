@@ -50,6 +50,26 @@
     color: #fff;
     padding:0px;
   }
+  header .navbar {
+    background-color: #3E64D6;
+    border: none;
+    margin-bottom: 0;
+  }
+  header .navbar-default .navbar-nav > li > a {
+    color: #fff !important;
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+  header .navbar-default .navbar-nav > li > a:hover, 
+  header .navbar-default .navbar-nav > li.active > a {
+    background-color: #29428E !important;
+    color: #fff !important;
+  }
+  header .navbar-brand {
+    color: #fff !important;
+    font-weight: bold;
+    text-transform: uppercase;
+  }
 </style>
 
 </head>

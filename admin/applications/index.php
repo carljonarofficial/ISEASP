@@ -29,6 +29,26 @@ switch ($view) {
         $content = 'exam_slip.php';
         $subtitle = 'Generate Examination Slip';
         break;
+    case 'batch_exam_slip':
+        $content = 'batch_exam_slip.php';
+        $subtitle = 'Batch Generate Examination Slips';
+        break;
+    case 'batch_print':
+        $content = 'batch_print.php';
+        $subtitle = 'Batch Print Examination Slips';
+        break;
+    case 'batch_interview':
+        $content = 'batch_interview.php';
+        $subtitle = 'Batch Schedule Interview';
+        break;
+    case 'batch_interview_result':
+        $content = 'batch_interview_result.php';
+        $subtitle = 'Batch Enter Interview Results';
+        break;
+    case 'batch_evaluation':
+        $content = 'batch_evaluation.php';
+        $subtitle = 'Batch Final Evaluation';
+        break;
     case 'print_slip':
         $content = 'print_slip.php';
         $subtitle = 'Print Examination Slip';
@@ -56,6 +76,14 @@ switch ($view) {
     case 'convert':
         $content = 'convert.php';
         $subtitle = 'Convert to Scholar';
+        break;
+    case 'batch_convert':
+        $content = 'batch_convert.php';
+        $subtitle = 'Batch Convert to Scholar';
+        break;
+    case 'batch_renew':
+        $content = 'batch_renew.php';
+        $subtitle = 'Batch Renew Scholars';
         break;
     default:
         $content = 'list.php';

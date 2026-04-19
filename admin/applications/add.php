@@ -8,7 +8,7 @@ global $mydb;
 
 <style>
 :root {
-    --primary-color: #27ae60;
+    --primary-color: #3E64D6;
     --primary-dark: #219a52;
     --primary-light: #2ecc71;
     --secondary-color: #3498db;
@@ -31,7 +31,7 @@ body {
 }
 
 .page-header {
-    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    background: linear-gradient(135deg, #3E64D6, #3E64D6);
     color: white;
     padding: 30px;
     border-radius: 15px;
@@ -172,7 +172,7 @@ body {
 
 .card-header {
     padding: 18px 25px;
-    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    background: linear-gradient(135deg, #3E64D6, #3E64D6);
     color: white;
     border-bottom: none;
     display: flex;
@@ -183,7 +183,7 @@ body {
 }
 
 .card-header:hover {
-    background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
+    background: linear-gradient(135deg, #2c385d, #2c385d);
 }
 
 .card-header h3 {
@@ -452,7 +452,7 @@ textarea.form-control {
 }
 
 .btn-submit {
-    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-color));
     color: white;
     border: none;
     padding: 15px 40px;
@@ -835,7 +835,7 @@ textarea.form-control {
             </div>
             <div class="card-body">
 
-                <h4 style="margin-bottom: 15px; color: var(--primary-dark);">
+                <h4 style="margin-bottom: 15px; color: #3E64D6;">
                     Permanent Address  <span style="color:red;">*</span></span>
                 </h4>
 
@@ -874,7 +874,7 @@ textarea.form-control {
 
                 <hr style="margin: 25px 0;">
 
-                <h4 style="margin-bottom: 15px; color: var(--primary-dark);">
+                <h4 style="margin-bottom: 15px; color: #3E64D6;">
                     <i class="fa fa-location-arrow"></i> Present Address
                 </h4>
                 <p style="margin-top: -5px; color: var(--text-light); font-size: 0.9em;">
@@ -986,7 +986,7 @@ textarea.form-control {
                             $municipalities = $mydb->loadResultList();
                             foreach($municipalities as $town):
                             ?>
-                            <option value="<?php echo $town->MUNICIPALITY_NAME; ?>"><?php echo $town->MUNICIPALITY_NAME; ?></option>
+                            <option value="<?php echo strtoupper($town->MUNICIPALITY_NAME); ?>"><?php echo strtoupper($town->MUNICIPALITY_NAME); ?></option>
                             <?php endforeach; ?>
                         </select>
                     </div>

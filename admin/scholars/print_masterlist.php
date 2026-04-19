@@ -308,7 +308,7 @@ $page_scholars = array_slice($scholars, $start_index, $rows_per_page);
     <div class="no-print">
         <button onclick="window.print()" class="btn-print">🖨️ Print Master List</button>
         <button onclick="window.close()" class="btn-close">❌ Close</button>
-        <button onclick="window.location.href='index.php?view=list'" class="btn-close">← Back</button>
+        <button onclick="window.location.href='../applications/index.php?stage=scholar'" class="btn-close">← Back</button>
     </div>
     
     <?php if($total_pages > 1): ?>

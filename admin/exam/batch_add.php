@@ -200,7 +200,7 @@ if (!isset($_SESSION['ADMIN_USERID'])) {
                     <button type="submit" class="btn btn-success btn-lg" id="submitBtn" disabled>
                         <i class="fa fa-save"></i> Save Exam Results
                     </button>
-                    <a href="index.php?view=results" class="btn btn-default btn-lg">
+                    <a href="../applications/index.php?stage=exam" class="btn btn-default btn-lg">
                         <i class="fa fa-arrow-left"></i> Back to Results
                     </a>
                 </div>

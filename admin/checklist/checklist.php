@@ -22,14 +22,34 @@ if (!$applicant) {
 
 // Handle form submission
 if (isset($_POST['update_checklist'])) {
-    // Get Total requirements for validation
-    
+    // Get all requirements to validate required ones
+    $mydb->setQuery("SELECT REQUIREMENT_ID, REQUIREMENT_NAME, REQUIRED FROM tbl_requirement");
+    $mydb->executeQuery();
+    $requirements = $mydb->loadResultList();
 
+    // Count the total required requirements for the applicant
+    $total_required = 0;
+    foreach ($requirements as $req) {
+        if ($req->REQUIRED == 'Yes') {
+            $total_required++;
+        }
+    }
+
+    // Count how many required requirements are submitted
+    $submitted_required = 0;
+
+    // Get Total requirements for validation
     foreach ($_POST['requirements'] as $req_id => $values) {
         $is_submitted = isset($values['submitted']) ? 1 : 0;
         $is_verified = isset($values['verified']) ? 1 : 0;
         $remarks = trim($values['remarks']);
-        
+
+        // Check if is submitted or not the required requirements
+        if ($is_submitted) {
+            $submitted_required++;
+        }
+
+        // Update or insert checklist record
         $sql = "UPDATE tbl_applicant_requirement_checklist SET 
                 IS_SUBMITTED = $is_submitted,
                 IS_VERIFIED = $is_verified,
@@ -41,6 +61,19 @@ if (isset($_POST['update_checklist'])) {
         $mydb->setQuery($sql);
         $mydb->executeQuery();
     }
+
+    // Check if applicant's all required requirements are submitted
+    $requirement_status = 'Pending';
+    if ($submitted_required == $total_required) {
+        $requirement_status = 'Complete';
+    } else {
+        $requirement_status = 'Incomplete';
+    }
+
+    // Update the applicant's requirement status
+    $update_sql = "UPDATE tbl_applicants SET REQUIREMENT_STATUS = '$requirement_status' WHERE APPLICANTID = $id";
+    $mydb->setQuery($update_sql);
+    $mydb->executeQuery();
     
     // Log the action
     $log_sql = "INSERT INTO tbl_application_log 

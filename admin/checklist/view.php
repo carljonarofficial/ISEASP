@@ -87,7 +87,7 @@ $progress_percentage = ($total_req > 0) ? round(($verified_req / $total_req) * 1
         <a href="index.php?view=manage&id=<?= $id ?>" class="btn btn-primary">
             <i class="fa fa-edit"></i> Manage Requirements
         </a>
-        <a href="index.php" class="btn btn-default">
+        <a href="../applications/" class="btn btn-default">
             <i class="fa fa-arrow-left"></i> Back to List
         </a>
     </div>

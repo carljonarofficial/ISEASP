@@ -25,6 +25,21 @@ switch ($action) {
     case 'batch_print_slips':
         doBatchPrintSlips();
         break;
+    case 'batch_generate_exam_slips':
+        doBatchGenerateExamSlips();
+        break;
+    case 'batch_schedule_interview':
+        doBatchScheduleInterview();
+        break;
+    case 'batch_interview_results':
+        doBatchInterviewResults();
+        break;
+    case 'batch_evaluation':
+        doBatchEvaluation();
+        break;
+    case 'batch_convert_to_scholar':
+        doBatchConvert();
+        break;
 }
 
 // Cache requirements - Moved BEFORE switch for better organization
@@ -526,5 +541,293 @@ function doBatchPrintSlips() {
 
     // If no valid IDs, redirect back
     redirect("index.php?view=results");
+}
+
+function doBatchGenerateExamSlips() {
+    global $mydb;
+    if (isset($_POST['generate'])) {
+        $ids = explode(',', $_POST['ids']);
+        $exam_date = $_POST['exam_date'];
+        $exam_time = $_POST['exam_time'];
+        $exam_venue = addslashes($_POST['exam_venue']);
+        $notes = addslashes($_POST['notes']);
+        $admin_id = $_SESSION['ADMIN_USERID'];
+        $year = date('Y');
+
+        foreach ($ids as $id) {
+            $id = intval($id);
+            $slip_number = "EXAM-$year-" . str_pad($id, 5, '0', STR_PAD_LEFT);
+
+            // Update Applicant
+            $sql = "UPDATE tbl_applicants SET 
+                    EXAM_SLIP_NUMBER = '$slip_number',
+                    EXAM_SLIP_GENERATED = NOW(),
+                    EXAM_DATE = '$exam_date',
+                    EXAM_TIME = '$exam_time',
+                    EXAM_VENUE = '$exam_venue',
+                    EXAM_NOTES = '$notes',
+                    EXAM_STATUS = 'Pending'
+                    WHERE APPLICANTID = $id AND REQUIREMENT_STATUS = 'Complete'";
+            $mydb->setQuery($sql);
+            $mydb->executeQuery();
+
+            // Add into exam result as pending
+            $result_sql = "INSERT INTO tbl_exam_results (APPLICANTID, EXAMINER_ID, EXAM_DATE, TOTAL_SCORE, PASSING_SCORE, REMARKS, CREATED_AT, UPDATED_AT) 
+                        VALUES ($id, " . $admin_id . ", '$exam_date', NULL, 75, '', NOW(), NOW())";
+            $mydb->setQuery($result_sql);
+            $mydb->executeQuery();
+
+            // Log
+            $log_sql = "INSERT INTO tbl_application_log (APPLICANTID, USERID, USERNAME, USER_ROLE, ACTION, ACTION_TYPE, DETAILS)
+                        SELECT $id, $admin_id, USERNAME, ROLE, 'Exam slip generated (Batch)', 'EXAM', 'Generated: $slip_number'
+                        FROM tblusers WHERE USERID = $admin_id";
+            $mydb->setQuery($log_sql);
+            $mydb->executeQuery();
+        }
+
+        message("Batch exam slips generated successfully for eligible applicants.", "success");
+        redirect("index.php?view=list&stage=exam_slip");
+    }
+}
+
+function doBatchScheduleInterview() {
+    global $mydb;
+    if (isset($_POST['schedule'])) {
+        $ids = explode(',', $_POST['ids']);
+        $interview_date = date('Y-m-d H:i:s', strtotime($_POST['interview_date']));
+        $interview_mode = addslashes($_POST['interview_mode']);
+        $interviewer_id = intval($_POST['interviewer_id']);
+        $admin_id = $_SESSION['ADMIN_USERID'];
+
+        foreach ($ids as $applicant_id) {
+            $applicant_id = intval($applicant_id);
+            
+            // Check if interview record exists
+            $mydb->setQuery("SELECT INTERVIEW_ID FROM tbl_interview WHERE APPLICANTID = $applicant_id");
+            $existing = $mydb->loadSingleResult();
+            
+            if ($existing) {
+                $sql = "UPDATE tbl_interview SET 
+                        INTERVIEW_DATE = '$interview_date',
+                        INTERVIEW_MODE = '$interview_mode',
+                        INTERVIEWER_ID = $interviewer_id,
+                        RECOMMENDATION = 'For Review'
+                        WHERE APPLICANTID = $applicant_id";
+            } else {
+                $sql = "INSERT INTO tbl_interview (APPLICANTID, INTERVIEW_DATE, INTERVIEW_MODE, RECOMMENDATION, COMMENTS, INTERVIEWER_ID)
+                        VALUES ($applicant_id, '$interview_date', '$interview_mode', 'For Review', 'Awaiting interview schedule (batch)', $interviewer_id)";
+            }
+            $mydb->setQuery($sql);
+            $mydb->executeQuery();
+            
+            // Update applicant status
+            $status_sql = "UPDATE tbl_applicants SET STATUS = 'For Interview' WHERE APPLICANTID = $applicant_id";
+            $mydb->setQuery($status_sql);
+            $mydb->executeQuery();
+
+            // Log
+            $log_sql = "INSERT INTO tbl_application_log (APPLICANTID, USERID, USERNAME, USER_ROLE, ACTION, ACTION_TYPE, DETAILS)
+                        SELECT $applicant_id, $admin_id, USERNAME, ROLE, 'Interview scheduled (Batch)', 'INTERVIEW', 'Scheduled: $interview_date'
+                        FROM tblusers WHERE USERID = $admin_id";
+            $mydb->setQuery($log_sql);
+            $mydb->executeQuery();
+        }
+
+        message("Batch interview schedule set successfully for eligible applicants.", "success");
+        redirect("index.php?view=list&stage=interview");
+    }
+}
+
+function doBatchInterviewResults() {
+    global $mydb;
+    if (isset($_POST['save_results'])) {
+        $applicant_ids = $_POST['applicant_ids'];
+        $scores = $_POST['scores'];
+        $recommendations = $_POST['recommendations'];
+        $comments = $_POST['comments'];
+        $admin_id = $_SESSION['ADMIN_USERID'];
+
+        $success_count = 0;
+
+        foreach ($applicant_ids as $id) {
+            $id = intval($id);
+            $score = floatval($scores[$id]);
+            $recommendation = addslashes($recommendations[$id]);
+            $comment = addslashes($comments[$id]);
+
+            // Update Interview Record
+            $sql = "UPDATE tbl_interview SET 
+                    SCORE = $score, 
+                    RECOMMENDATION = '$recommendation', 
+                    COMMENTS = '$comment',
+                    INTERVIEWER_ID = $admin_id
+                    WHERE APPLICANTID = $id";
+            $mydb->setQuery($sql);
+            $mydb->executeQuery();
+
+            // Update Applicant Status based on Recommendation
+            $new_status = 'For Interview';
+            if ($recommendation === 'Pass') {
+                $new_status = 'Pending'; // Moves to For Evaluation stage
+            } elseif ($recommendation === 'Fail') {
+                $new_status = 'Rejected';
+            }
+
+            if ($new_status !== 'For Interview') {
+                $status_sql = "UPDATE tbl_applicants SET STATUS = '$new_status' WHERE APPLICANTID = $id";
+                $mydb->setQuery($status_sql);
+                $mydb->executeQuery();
+            }
+
+            // Log
+            $log_sql = "INSERT INTO tbl_application_log (APPLICANTID, USERID, USERNAME, USER_ROLE, ACTION, ACTION_TYPE, DETAILS)
+                        SELECT $id, $admin_id, USERNAME, ROLE, 'Interview result recorded (Batch)', 'INTERVIEW', 'Score: $score, Rec: $recommendation'
+                        FROM tblusers WHERE USERID = $admin_id";
+            $mydb->setQuery($log_sql);
+            $mydb->executeQuery();
+            
+            $success_count++;
+        }
+
+        message("Batch interview results saved successfully for $success_count applicants.", "success");
+        redirect("index.php?view=list&stage=interview");
+    }
+}
+
+function doBatchEvaluation() {
+    global $mydb;
+    if (isset($_POST['save_evaluations'])) {
+        $applicant_ids = $_POST['applicant_ids'];
+        $final_statuses = $_POST['final_statuses'];
+        $feedbacks = $_POST['feedbacks'];
+        $admin_id = $_SESSION['ADMIN_USERID'];
+
+        $success_count = 0;
+
+        foreach ($applicant_ids as $id) {
+            $id = intval($id);
+            $final_status = addslashes($final_statuses[$id]);
+            $feedback = addslashes($feedbacks[$id]);
+
+            // Insert into tbl_evaluation
+            $eval_sql = "INSERT INTO tbl_evaluation 
+                        (APPLICANTID, EVALUATED_BY, FINAL_STATUS, FEEDBACK, EVALUATION_DATE)
+                        VALUES ($id, $admin_id, '$final_status', '$feedback', NOW())";
+            $mydb->setQuery($eval_sql);
+            $mydb->executeQuery();
+
+            // Update applicant status
+            $new_status = 'Pending';
+            if ($final_status == 'Qualified') {
+                $new_status = 'Qualified';
+            } elseif ($final_status == 'Not Qualified') {
+                $new_status = 'Rejected';
+            } elseif ($final_status == 'For Review') {
+                $new_status = 'For Review';
+            }
+
+            if ($new_status !== 'Pending') {
+                $status_sql = "UPDATE tbl_applicants SET STATUS = '$new_status' WHERE APPLICANTID = $id";
+                $mydb->setQuery($status_sql);
+                $mydb->executeQuery();
+            }
+
+            // Add to scholarship history if qualified
+            if ($final_status == 'Qualified') {
+                $mydb->setQuery("SELECT GPA FROM tbl_applicants WHERE APPLICANTID = $id");
+                $gpa_result = $mydb->loadSingleResult();
+                $gpa = $gpa_result->GPA ?? 0;
+                
+                $history_sql = "INSERT INTO tbl_scholarship_history 
+                               (APPLICANTID, SCHOOL_YEAR, SEMESTER, STATUS, GPA, REMARKS, UPDATED_BY)
+                               SELECT 
+                                   $id, SCHOOL_YEAR, SEMESTER, 'Interviewed', $gpa, 
+                                   'Passed final evaluation - Qualified (Batch)', $admin_id
+                               FROM tbl_applicants WHERE APPLICANTID = $id";
+                $mydb->setQuery($history_sql);
+                $mydb->executeQuery();
+            }
+
+            // Log
+            $log_sql = "INSERT INTO tbl_application_log (APPLICANTID, USERID, USERNAME, USER_ROLE, ACTION, ACTION_TYPE, DETAILS)
+                        SELECT $id, $admin_id, USERNAME, ROLE, 'Final evaluation recorded (Batch)', 'EVALUATION', 'Status: $final_status'
+                        FROM tblusers WHERE USERID = $admin_id";
+            $mydb->setQuery($log_sql);
+            $mydb->executeQuery();
+            
+            $success_count++;
+        }
+
+        message("Batch final evaluation saved successfully for $success_count applicants.", "success");
+        redirect("index.php?view=list&stage=evaluation");
+    }
+}
+
+function doBatchConvert() {
+    global $mydb;
+    if (isset($_POST['convert'])) {
+        $ids = $_POST['applicant_ids'];
+        $amount = $_POST['amount'];
+        $school_year = $_POST['school_year'];
+        $semester = $_POST['semester'];
+        $remarks = addslashes(trim($_POST['remarks']));
+        $user_id = $_SESSION['ADMIN_USERID'];
+
+        // Get current user info for logging
+        $mydb->setQuery("SELECT USERNAME, ROLE FROM tblusers WHERE USERID = $user_id");
+        $mydb->executeQuery();
+        $user = $mydb->loadSingleResult();
+
+        $success_count = 0;
+
+        foreach ($ids as $id) {
+            $id = intval($id);
+            
+            // Get current GPA for history
+            $mydb->setQuery("SELECT GPA FROM tbl_applicants WHERE APPLICANTID = $id");
+            $applicant = $mydb->loadSingleResult();
+            $gpa = $applicant->GPA ?? 0;
+
+            // 1. Update applicant status to Scholar
+            $sql = "UPDATE tbl_applicants SET STATUS = 'Scholar' WHERE APPLICANTID = $id";
+            $mydb->setQuery($sql);
+            $mydb->executeQuery();
+
+            // 2. Insert into scholarship awards
+            $award_sql = "INSERT INTO tbl_scholarship_awards 
+                          (APPLICANTID, SCHOOL_YEAR, SEMESTER, AWARD_DATE, AWARDED_BY, AMOUNT, STATUS, REMARKS)
+                          VALUES ($id, '$school_year', '$semester', NOW(), $user_id, '$amount', 'Active', '$remarks')";
+            $mydb->setQuery($award_sql);
+            $mydb->executeQuery();
+
+            // 3. Insert into scholarship history
+            $history_sql = "INSERT INTO tbl_scholarship_history 
+                            (APPLICANTID, SCHOOL_YEAR, SEMESTER, STATUS, GPA, REMARKS, UPDATED_BY)
+                            VALUES ($id, '$school_year', '$semester', 'Awarded', '$gpa', 'Batch converted to scholar', $user_id)";
+            $mydb->setQuery($history_sql);
+            $mydb->executeQuery();
+
+            // 4. Log the action
+            $log_sql = "INSERT INTO tbl_application_log 
+                        (APPLICANTID, USERID, USERNAME, USER_ROLE, ACTION, ACTION_TYPE, DETAILS)
+                        VALUES ($id, $user_id, '{$user->USERNAME}', '{$user->ROLE}', 
+                                'Converted to Scholar (Batch)', 'SCHOLAR', 
+                                'Converted to scholar via batch processing for $school_year $semester')";
+            $mydb->setQuery($log_sql);
+            $mydb->executeQuery();
+            
+            $success_count++;
+        }
+
+        if ($success_count > 0) {
+            message("Successfully converted $success_count qualified applicants to scholars!", "success");
+        } else {
+            message("No applicants were processed.", "error");
+        }
+
+        redirect("index.php?stage=scholar");
+    } else {
+        redirect("index.php?stage=qualified");
+    }
 }
 ?>

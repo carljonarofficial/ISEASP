@@ -123,7 +123,7 @@ $current_sy = '2025-2026';
                 <div class="icon">
                     <i class="fa fa-graduation-cap"></i>
                 </div>
-                <a href="<?php echo web_root; ?>admin/scholars/" class="small-box-footer">
+                <a href="<?php echo web_root; ?>admin/applications/index.php?view=list&stage=scholar" class="small-box-footer">
                     View Scholars <i class="fa fa-arrow-circle-right"></i>
                 </a>
             </div>
@@ -138,7 +138,7 @@ $current_sy = '2025-2026';
                 <div class="icon">
                     <i class="fa fa-file-text"></i>
                 </div>
-                <a href="<?php echo web_root; ?>admin/applications/" class="small-box-footer">
+                <a href="<?php echo web_root; ?>admin/applications/index.php?view=list&stage=new" class="small-box-footer">
                     Review Applications <i class="fa fa-arrow-circle-right"></i>
                 </a>
             </div>
@@ -153,7 +153,7 @@ $current_sy = '2025-2026';
                 <div class="icon">
                     <i class="fa fa-users"></i>
                 </div>
-                <a href="<?php echo web_root; ?>admin/applications/index.php?stage=interview" class="small-box-footer">
+                <a href="<?php echo web_root; ?>admin/applications/index.php?view=list&stage=interview" class="small-box-footer">
                     View Interviews <i class="fa fa-arrow-circle-right"></i>
                 </a>
             </div>
@@ -168,7 +168,7 @@ $current_sy = '2025-2026';
                 <div class="icon">
                     <i class="fa fa-star"></i>
                 </div>
-                <a href="<?php echo web_root; ?>admin/applications/index.php?stage=qualified" class="small-box-footer">
+                <a href="<?php echo web_root; ?>admin/applications/index.php?view=list&stage=qualified" class="small-box-footer">
                     View Qualified <i class="fa fa-arrow-circle-right"></i>
                 </a>
             </div>
@@ -463,8 +463,19 @@ $current_sy = '2025-2026';
                             $mydb->setQuery("SELECT COUNT(*) as total FROM tbl_applicants WHERE STATUS = '$status'");
                             $mydb->executeQuery();
                             $count = $mydb->loadSingleResult();
+
+                            $stage_link = match($status) {
+                                'Pending'       => 'applications/index.php?view=list&stage=new',
+                                'For Interview' => 'applications/index.php?view=list&stage=interview',
+                                'Qualified'     => 'applications/index.php?view=list&stage=qualified',
+                                'Scholar'       => 'applications/index.php?view=list&stage=scholar',
+                                'Graduated'     => 'scholars/index.php?view=graduates',
+                                'Rejected'      => 'applications/index.php?view=list&stage=all',
+                                default         => 'applications/index.php?view=list'
+                            };
                         ?>
                         <div class="col-md-2 col-xs-6">
+                            <a href="<?php echo web_root; ?>admin/<?php echo $stage_link; ?>" style="color: inherit; text-decoration: none;">
                             <div class="info-box">
                                 <span class="info-box-icon bg-<?php echo $colors[$index]; ?>">
                                     <i class="fa 
@@ -483,6 +494,7 @@ $current_sy = '2025-2026';
                                     <span class="info-box-number"><?php echo $count ? $count->total : 0; ?></span>
                                 </div>
                             </div>
+                            </a>
                         </div>
                         <?php endforeach; ?>
                     </div>
@@ -528,6 +540,11 @@ $(document).ready(function() {
     box-shadow: 0 1px 1px rgba(0,0,0,0.1);
     border-radius: 2px;
     margin-bottom: 15px;
+    transition: all 0.3s ease;
+}
+.info-box:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 .info-box-icon {
     border-top-left-radius: 2px;

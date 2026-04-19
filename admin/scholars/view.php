@@ -65,7 +65,7 @@ $history = $mydb->loadResultList();
 <!-- Action Buttons -->
 <div class="row" style="margin-bottom: 15px;">
     <div class="col-lg-12">
-        <a href="index.php" class="btn btn-primary">
+        <a href="../applications/index.php?stage=scholar" class="btn btn-primary">
             <i class="fa fa-arrow-left"></i> Back to List
         </a>
         
