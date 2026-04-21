@@ -187,13 +187,13 @@ $has_applicants = !empty($applicants);
 .dropdown-menu { z-index: 9999 !important; }
 </style>
 
-<div class="row no-print">
+<!-- <div class="row no-print">
     <div class="col-lg-12" style="margin-bottom: 15px;">
         <a href="index.php?view=add" class="btn btn-primary" style="background-color: #27ae60; border-color: #229954;">
             <i class="fa fa-plus"></i> New Applicant
         </a>
     </div>
-</div>
+</div> -->
 
 <!-- Filter Applicants -->
 <div class="row no-print">
