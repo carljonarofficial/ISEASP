@@ -624,7 +624,7 @@ $has_applicants = !empty($applicants);
                             <?php if($stage === 'exam'):
                                 echo getExamStatusLabel(75, $a->TOTAL_SCORE); ?>
                             <?php endif; ?>
-                            <span class="label label-<?= getStatusColor($a->STATUS) ?> status-badge"><?= $a->STATUS ?? 'Pending' ?></span>
+                            <span class="label label-<?= getStatusColor($a->STATUS) ?> status-badge"><?= $a->STATUS ?? 'Pending' ?><?= ($stage === 'all' || $stage === 'new') ? ' Stage' : "" ?></span>
                         </td>
                         <td><?= $a->GPA ?></td>
                         <td class="text-center no-print" onclick="event.cancelBubble=true; event.stopPropagation();">
