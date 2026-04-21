@@ -60,6 +60,41 @@ if (isset($_POST['renew'])) {
     
     $mydb->setQuery($renew_sql);
     $mydb->executeQuery();
+
+    // Insert or Update Scholar Renewal Table
+    $renewal_check_sql = "SELECT COUNT(*) as count FROM tbl_scholar_renewals WHERE scholar_id = " . $scholar->APPLICANTID;
+    $mydb->setQuery($renewal_check_sql);
+    $mydb->executeQuery();
+    $renewal_check = $mydb->loadSingleResult();
+    
+    // This is the SQL for tbl_scholar_renewals and school year, which will be used to track the latest renewal status for each scholar
+    // SELECT `id`, `scholar_id`, `school_year_id`, `renewal_date`, `status`, `approved_by`, `approved_date`, `remarks` FROM `tbl_scholar_renewals`
+    if ($renewal_check->count > 0) {
+        $update_sql = "UPDATE tbl_scholar_renewals SET 
+                       school_year_id = (SELECT id FROM tbl_school_years WHERE school_year = '$school_year),
+                          renewal_date = NOW(),
+                            status = '".strtolower($status)."',
+                            approved_by = " . $_SESSION['ADMIN_USERID'] . ",
+                            approved_date = NOW(),
+                            remarks = '$remarks'
+                          WHERE scholar_id = " . $scholar->APPLICANTID;
+        $mydb->setQuery($update_sql);
+        $mydb->executeQuery();
+    } else {
+        $insert_sql = "INSERT INTO tbl_scholar_renewals 
+                       (scholar_id, school_year_id, renewal_date, status, approved_by, approved_date, remarks)
+                       VALUES (
+                           " . $scholar->APPLICANTID . ", 
+                           (SELECT id FROM tbl_school_years WHERE school_year = '$school_year'),
+                           NOW(),
+                           '".strtolower($status)."',
+                           " . $_SESSION['ADMIN_USERID'] . ",
+                           NOW(),
+                           '$remarks'
+                       )";
+        $mydb->setQuery($insert_sql);
+        $mydb->executeQuery();
+    }
     
     // Update scholarship award if approved
     if ($status == 'Approved') {

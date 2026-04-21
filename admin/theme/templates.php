@@ -348,6 +348,7 @@
                              <li><a href="<?php echo web_root;?>admin/system/index.php?view=list"><i class="fa fa-users"></i> Manage Users</a></li>
                              <li><a href="<?php echo web_root; ?>admin/checklist/index.php?view=manage_req"><i class="fa fa-circle-o"></i> Manage
                                     Requirements</a></li>
+                            <li><a href="<?php echo web_root;?>admin/system/index.php?view=school_years"><i class="fa fa-calendar"></i> School Years</a></li>
                             <li><a href="<?php echo web_root;?>admin/system/index.php?view=settings"><i class="fa fa-wrench"></i> System Settings</a></li>
                             <li><a href="<?php echo web_root;?>admin/system/index.php?view=logs"><i class="fa fa-history"></i> Activity Logs</a></li>
                             <!-- <li><a href="<?php echo web_root;?>admin/system/index.php?view=backup"><i class="fa fa-database"></i> Database Backup</a></li> -->

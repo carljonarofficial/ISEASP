@@ -14,54 +14,60 @@ function getActiveSchoolYear() {
     return $result;
 }
 
-// Get renewed scholars count for the school year
-function getRenewedScholarsCount() {
+function getSchoolYears() {
     global $mydb;
-    $active_sy = getActiveSchoolYear();
-    if(!$active_sy) return 0;
-    
+    $mydb->setQuery("SELECT * FROM tbl_school_years ORDER BY school_year DESC");
+    $mydb->executeQuery();
+    return $mydb->loadResultList();
+}
+
+function getSYById($id) {
+    global $mydb;
+    $mydb->setQuery("SELECT * FROM tbl_school_years WHERE id = '$id'");
+    $mydb->executeQuery();
+    return $mydb->loadSingleResult();
+}
+
+// Get renewed scholars count for a specific school year
+function getRenewedScholarsCount($sy_id) {
+    global $mydb;
+    if(!$sy_id) return 0;
     $mydb->setQuery("SELECT COUNT(*) as count FROM tbl_scholar_renewals 
-                     WHERE school_year_id = '{$active_sy->id}' AND status = 'approved'");
+                     WHERE school_year_id = '$sy_id' AND status = 'approved'");
     $mydb->executeQuery();
     $result = $mydb->loadSingleResult();
     return $result ? $result->count : 0;
 }
 
-function getTotalDisbursed() {
+function getTotalDisbursed($sy_id) {
     global $mydb;
-    $active_sy = getActiveSchoolYear();
-    if(!$active_sy) return 0;
-    
+    if(!$sy_id) return 0;
     $mydb->setQuery("SELECT SUM(total_amount) as total FROM tbl_payroll 
-                     WHERE school_year_id = '{$active_sy->id}' AND status = 'disbursed'");
+                     WHERE school_year_id = '$sy_id' AND status = 'disbursed'");
     $mydb->executeQuery();
     $result = $mydb->loadSingleResult();
     return number_format($result->total ?? 0, 2);
 }
 
-function getPendingPayrollCount() {
+function getPendingPayrollCount($sy_id) {
     global $mydb;
-    $active_sy = getActiveSchoolYear();
-    if(!$active_sy) return 0;
-    
+    if(!$sy_id) return 0;
     $mydb->setQuery("SELECT COUNT(*) as count FROM tbl_payroll 
-                     WHERE school_year_id = '{$active_sy->id}' AND status = 'pending'");
+                     WHERE school_year_id = '$sy_id' AND status = 'pending'");
     $mydb->executeQuery();
     $result = $mydb->loadSingleResult();
     return $result->count ?? 0;
 }
 
-function getPayrollList() {
+function getPayrollList($sy_id) {
     global $mydb;
-    $active_sy = getActiveSchoolYear();
-    if(!$active_sy) return [];
-    
+    if(!$sy_id) return [];
     $mydb->setQuery("
         SELECT p.*, sy.school_year,
             (SELECT COUNT(*) FROM tbl_payroll_details WHERE payroll_id = p.id) as scholar_count 
         FROM tbl_payroll p 
         LEFT JOIN tbl_school_years sy ON p.school_year_id = sy.id
-        WHERE p.school_year_id = '{$active_sy->id}'
+        WHERE p.school_year_id = '$sy_id'
         ORDER BY p.payment_date DESC
     ");
     $mydb->executeQuery();
@@ -70,15 +76,42 @@ function getPayrollList() {
 }
 
 $active_sy = getActiveSchoolYear();
-$renewed_count = getRenewedScholarsCount();
-$total_disbursed = getTotalDisbursed();
-$pending_count = getPendingPayrollCount();
-$payrolls = getPayrollList();
+$all_sy = getSchoolYears();
+$selected_sy_id = isset($_GET['school_year_id']) ? intval($_GET['school_year_id']) : ($active_sy ? $active_sy->id : 0);
+$selected_sy = getSYById($selected_sy_id);
+
+$renewed_count = getRenewedScholarsCount($selected_sy_id);
+$total_disbursed = getTotalDisbursed($selected_sy_id);
+$pending_count = getPendingPayrollCount($selected_sy_id);
+$payrolls = getPayrollList($selected_sy_id);
 ?>
 
 <div class="row">
     <div class="col-lg-12">
-        <h1 class="page-header">Payroll Management - <?php echo $active_sy ? $active_sy->school_year : 'No Active School Year'; ?></h1>
+        <h1 class="page-header">Payroll Management - <?php echo $selected_sy ? $selected_sy->school_year : 'No School Year Selected'; ?></h1>
+    </div>
+</div>
+
+<!-- Filter Section -->
+<div class="row" style="margin-bottom: 20px;">
+    <div class="col-lg-12">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <form method="GET" action="index.php" class="form-inline">
+                    <input type="hidden" name="view" value="payroll">
+                    <div class="form-group">
+                        <label>Select School Year: </label>
+                        <select name="school_year_id" class="form-control" onchange="this.form.submit()">
+                            <?php foreach($all_sy as $sy): ?>
+                            <option value="<?php echo $sy->id; ?>" <?php echo $selected_sy_id == $sy->id ? 'selected' : ''; ?>>
+                                <?php echo $sy->school_year; ?> <?php echo $sy->is_active ? '(Active)' : ''; ?>
+                            </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -89,7 +122,7 @@ $payrolls = getPayrollList();
             <div class="inner">
                 <h3>₱ <?php echo $total_disbursed; ?></h3>
                 <p>Total Disbursed</p>
-                <small>For <?php echo $active_sy ? $active_sy->school_year : 'N/A'; ?></small>
+                <small>For <?php echo $selected_sy ? $selected_sy->school_year : 'N/A'; ?></small>
             </div>
             <div class="icon">
                 <i class="fa fa-money"></i>
@@ -102,7 +135,7 @@ $payrolls = getPayrollList();
             <div class="inner">
                 <h3><?php echo $renewed_count; ?></h3>
                 <p>Renewed Scholars</p>
-                <small>For <?php echo $active_sy ? $active_sy->school_year : 'N/A'; ?></small>
+                <small>For <?php echo $selected_sy ? $selected_sy->school_year : 'N/A'; ?></small>
             </div>
             <div class="icon">
                 <i class="fa fa-users"></i>
@@ -140,7 +173,7 @@ $payrolls = getPayrollList();
 <!-- Action Buttons -->
 <div class="row">
     <div class="col-lg-12" style="margin-bottom: 10px;">
-        <?php if($active_sy && $renewed_count > 0): ?>
+        <?php if($selected_sy && $renewed_count > 0): ?>
         <button type="button" class="btn btn-success" data-toggle="modal" data-target="#generatePayrollModal">
             <i class="fa fa-plus"></i> Generate School Year Payroll
         </button>
@@ -155,22 +188,22 @@ $payrolls = getPayrollList();
 </div>
 
 <!-- Alert Messages -->
-<?php if(!$active_sy): ?>
+<?php if(!$selected_sy): ?>
 <div class="alert alert-warning">
-    <i class="fa fa-warning"></i> No active school year set. Please set the active school year in System Settings first.
+    <i class="fa fa-warning"></i> No school year found. Please add school years in System Settings.
 </div>
 <?php elseif($renewed_count == 0): ?>
 <div class="alert alert-info">
-    <i class="fa fa-info-circle"></i> No renewed scholars for <?php echo $active_sy->school_year; ?>. 
+    <i class="fa fa-info-circle"></i> No renewed scholars for <?php echo $selected_sy->school_year; ?>. 
     Please renew scholars first before generating payroll.
-    <a href="index.php?view=renew" class="alert-link">Renew Scholars</a>
+    <a href="../applications/index.php?stage=scholar" class="alert-link">Manage Scholars</a>
 </div>
 <?php endif; ?>
 
 <!-- Payroll List -->
 <div class="panel panel-success">
     <div class="panel-heading">
-        <i class="fa fa-list"></i> Payroll Batches - <?php echo $active_sy ? $active_sy->school_year : 'No Active School Year'; ?>
+        <i class="fa fa-list"></i> Payroll Batches - <?php echo $selected_sy ? $selected_sy->school_year : 'No School Year Selected'; ?>
     </div>
     <div class="panel-body">
         <div class="table-responsive">
@@ -230,6 +263,11 @@ $payrolls = getPayrollList();
                                 <i class="fa fa-check"></i> Approve
                             </a>
                             <?php endif; ?>
+                            <?php if($row->status == 'pending'): ?>
+                            <a href="controller.php?action=sync_payroll_scholars&id=<?php echo $row->id; ?>" class="btn btn-warning btn-xs" onclick="return confirm('Search for missing renewed scholars and add them to this batch?')">
+                                <i class="fa fa-refresh"></i> Sync
+                            </a>
+                            <?php endif; ?>
                             <?php if($row->status == 'approved' && ($_SESSION['ADMIN_ROLE'] == 'Super Admin' || $_SESSION['ADMIN_ROLE'] == 'Admin')): ?>
                             <a href="#" onclick="disbursePayroll(<?php echo $row->id; ?>)" class="btn btn-primary btn-xs">
                                 <i class="fa fa-money"></i> Disburse
@@ -244,7 +282,7 @@ $payrolls = getPayrollList();
                     
                     <?php if(empty($payrolls)): ?>
                     <tr>
-                        <td colspan="7" class="text-center">No payroll records found for <?php echo $active_sy ? $active_sy->school_year : 'current school year'; ?>.</td>
+                        <td colspan="7" class="text-center">No payroll records found for <?php echo $selected_sy ? $selected_sy->school_year : 'selected school year'; ?>.</td>
                     </tr>
                     <?php endif; ?>
                 </tbody>
@@ -265,8 +303,8 @@ $payrolls = getPayrollList();
                 <div class="modal-body">
                     <div class="form-group">
                         <label>School Year</label>
-                        <input type="text" class="form-control" value="<?php echo $active_sy->school_year; ?>" readonly disabled>
-                        <input type="hidden" name="school_year_id" value="<?php echo $active_sy->id; ?>">
+                        <input type="text" class="form-control" value="<?php echo $selected_sy->school_year; ?>" readonly disabled>
+                        <input type="hidden" name="school_year_id" value="<?php echo $selected_sy->id; ?>">
                     </div>
                     <div class="form-group">
                         <label>Payment/Schedule Date</label>
@@ -292,7 +330,7 @@ $payrolls = getPayrollList();
                     </div>
                     
                     <div class="alert alert-info">
-                        <i class="fa fa-info-circle"></i> This payroll will be generated for <strong><?php echo $renewed_count; ?></strong> renewed scholars for <?php echo $active_sy->school_year; ?>.
+                        <i class="fa fa-info-circle"></i> This payroll will be generated for <strong><?php echo $renewed_count; ?></strong> renewed scholars for <?php echo $selected_sy->school_year; ?>.
                     </div>
                 </div>
                 <div class="modal-footer">

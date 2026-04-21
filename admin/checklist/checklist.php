@@ -29,7 +29,9 @@ if (isset($_POST['update_checklist'])) {
 
     // Count the total required requirements for the applicant
     $total_required = 0;
+    $req_mandatory_map = [];
     foreach ($requirements as $req) {
+        $req_mandatory_map[$req->REQUIREMENT_ID] = ($req->REQUIRED == 'Yes');
         if ($req->REQUIRED == 'Yes') {
             $total_required++;
         }
@@ -45,7 +47,7 @@ if (isset($_POST['update_checklist'])) {
         $remarks = trim($values['remarks']);
 
         // Check if is submitted or not the required requirements
-        if ($is_submitted) {
+        if ($is_submitted && isset($req_mandatory_map[$req_id]) && $req_mandatory_map[$req_id]) {
             $submitted_required++;
         }
 
@@ -70,8 +72,14 @@ if (isset($_POST['update_checklist'])) {
         $requirement_status = 'Incomplete';
     }
 
+    // Change applicant's status if is complete to ready for exam
+    $applicant_status = "Pending";
+    if ($requirement_status == 'Complete') {
+        $applicant_status = "For Exam";
+    }
+
     // Update the applicant's requirement status
-    $update_sql = "UPDATE tbl_applicants SET REQUIREMENT_STATUS = '$requirement_status' WHERE APPLICANTID = $id";
+    $update_sql = "UPDATE tbl_applicants SET REQUIREMENT_STATUS = '$requirement_status', STATUS = '$applicant_status' WHERE APPLICANTID = $id";
     $mydb->setQuery($update_sql);
     $mydb->executeQuery();
     
@@ -189,7 +197,8 @@ $requirements = $mydb->loadResultList();
                                     </td>
                                     <td class="text-center">
                                         <input type="checkbox" name="requirements[<?= $req->REQUIREMENT_ID ?>][submitted]" 
-                                               value="1" <?= $req->IS_SUBMITTED ? 'checked' : '' ?>>
+                                               value="1" <?= $req->IS_SUBMITTED ? 'checked' : '' ?>
+                                               data-required="<?= $req->REQUIRED ?>">
                                     </td>
                                     <td class="text-center">
                                         <input type="checkbox" name="requirements[<?= $req->REQUIREMENT_ID ?>][verified]" 

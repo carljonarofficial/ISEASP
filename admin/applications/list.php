@@ -61,7 +61,7 @@ switch($stage) {
         $where[] = "a.STATUS NOT IN ('Qualified', 'Scholar')";
         break;
     case 'evaluation':
-        $where[] = "a.EXAM_STATUS = 'Passed' AND a.STATUS = 'Pending'";
+        $where[] = "a.EXAM_STATUS = 'Passed' AND a.STATUS = 'For Evaluation'";
         break;
     case 'interview':
         $where[] = "a.STATUS = 'For Interview'";
@@ -289,9 +289,9 @@ $has_applicants = !empty($applicants);
                                 <i class="fa fa-print"></i> Print Slips
                             </button>
                         <?php endif; ?>
-                        <?php if($stage === 'exam_slip'):?>
-                        <button type="button" class="btn btn-success btn-sm" id="batchAddResultBtn" disabled>
-                            <i class="fa fa-plus"></i> Batch Add/Edit Results
+                        <?php if($stage === 'exam_slip' || $stage === 'exam'):?>
+                        <button type="button" class="btn btn-<?= ($stage === 'exam_slip') ? 'success' : 'warning'?> btn-sm" id="batchAddResultBtn" disabled>
+                            <i class="fa fa-<?= ($stage === 'exam_slip') ? 'plus' : 'edit'?>"></i> Batch <?= ($stage === 'exam_slip') ? "Add" : "Edit" ?> Results
                         </button>
                         <?php endif; ?>
                         <?php if($stage === 'exam' || $stage === 'interview'): ?>
@@ -315,9 +315,9 @@ $has_applicants = !empty($applicants);
                         </button>
                         <?php endif; ?>
                         <?php if($stage === 'scholar'): ?>
-                        <button type="button" class="btn btn-primary btn-sm" id="batchRenewBtn" disabled>
+                        <!-- <button type="button" class="btn btn-primary btn-sm" id="batchRenewBtn" disabled>
                             <i class="fa fa-refresh"></i> Batch Renew Scholars
-                        </button>
+                        </button> -->
                         <?php endif; ?>
                         <!-- <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Delete selected applicants?')">
                             <i class="fa fa-trash"></i> Delete Selected
@@ -494,7 +494,7 @@ $has_applicants = !empty($applicants);
                     if($applicant->STATUS == 'Scholar') return 'stage-scholar';
                     if($applicant->STATUS == 'Qualified') return 'stage-qualified';
                     if($applicant->STATUS == 'For Interview') return 'stage-interview';
-                    if($applicant->EXAM_STATUS == 'Passed' && $applicant->STATUS == 'Pending') return 'stage-evaluation';
+                    if($applicant->EXAM_STATUS == 'Passed' && $applicant->STATUS == 'For Evaluation') return 'stage-evaluation';
                     if(!empty($applicant->EXAM_SLIP_GENERATED) && $applicant->EXAM_STATUS == 'Pending') return 'stage-exam-slip';
                     $verified = isset($applicant->VERIFIED_REQ) ? $applicant->VERIFIED_REQ : 0;
                     $total = isset($applicant->TOTAL_REQ) ? $applicant->TOTAL_REQ : 13;
@@ -506,8 +506,10 @@ $has_applicants = !empty($applicants);
                 function getStatusColor($status) {
                     switch($status) {
                         case 'Scholar': return 'success';
+                        case 'For Evaluation': return 'default';
                         case 'Qualified': return 'info';
-                        case 'For Interview': return 'warning';
+                        case 'For Exam': return 'warning';
+                        case 'For Interview': return 'default';
                         case 'Pending': return 'default';
                         case 'Graduated': return 'primary';
                         case 'Terminated': return 'danger';
@@ -587,12 +589,12 @@ $has_applicants = !empty($applicants);
                         $req_percentage = ($total_req > 0) ? round(($verified_req / $total_req) * 100) : 0;
                         
                         $req_status_color = ($verified_req == $total_req) ? 'success' : 'warning';
-                        $can_generate = (empty($a->EXAM_SLIP_GENERATED) && $a->STATUS == 'Pending' && $verified_req == $total_req);
+                        $can_generate = (empty($a->EXAM_SLIP_GENERATED) && $a->STATUS == 'For Exam' && $verified_req == $total_req);
                         $can_print = (!empty($a->EXAM_SLIP_GENERATED) && $a->EXAM_STATUS == 'Pending');
                         $can_batch_result = !empty($a->EXAM_RESULT_ID);
                         $can_interview = ($a->EXAM_STATUS == 'Passed' && ($a->STATUS == 'For Interview' || $a->STATUS == 'Pending'));
                         $can_interview_result = ($a->STATUS == 'For Interview');
-                        $can_evaluation = ($a->EXAM_STATUS == 'Passed' && $a->STATUS == 'Pending');
+                        $can_evaluation = ($a->EXAM_STATUS == 'Passed' && $a->STATUS == 'For Evaluation');
                         $can_convert = ($a->STATUS == 'Qualified');
                         $can_renew = ($a->STATUS == 'Scholar');
                         
@@ -616,7 +618,7 @@ $has_applicants = !empty($applicants);
                         <td><?= htmlspecialchars(abbreviateSchool($a->SCHOOL ?? 'N/A')) ?></td>
                         <!-- <td><span class="label label-<?= getApplicantTypeColor($a->APPLICATION_TYPE) ?> status-badge"><?= $a->APPLICATION_TYPE ?? 'New' ?></span></td> -->
                         <td>
-                            <?php if($stage === 'all' || $stage === 'new'): ?>
+                            <?php if(($stage === 'all' || $stage === 'new') && $a->STATUS == 'Pending'): ?>
                                 <span class="label label-<?= getRequirementStatusColor($a->REQUIREMENT_STATUS) ?> status-badge"><?= $a->REQUIREMENT_STATUS?> Requirements</span>
                             <?php endif; ?>
                             <?php if($stage === 'exam'):
@@ -632,7 +634,7 @@ $has_applicants = !empty($applicants);
                                     <i class="fa fa-eye"></i>
                                 </a>
                                 
-                                <?php if(empty($a->EXAM_SLIP_GENERATED) && $a->STATUS == 'Pending' && $verified_req == $total_req): ?>
+                                <?php if(empty($a->EXAM_SLIP_GENERATED) && $a->STATUS == 'For Exam' && $verified_req == $total_req): ?>
                                     <a href="./index.php?view=exam_slip&id=<?= $a->APPLICANTID ?>" 
                                        class="btn btn-warning btn-xs" data-toggle="tooltip" title="Generate Exam Slip">
                                         <i class="fa fa-ticket"></i>

@@ -340,32 +340,11 @@ $page_scholars = array_slice($scholars, $start_index, $rows_per_page);
     <div class="no-print">
         <button onclick="window.print()" class="btn-print">🖨️ Print Payroll</button>
         <button onclick="window.close()" class="btn-close">❌ Close</button>
-        <button onclick="window.location.href='index.php?view=payroll'" class="btn-close">← Back</button>
+        <button onclick="window.location.href='index.php?view=payroll_details&id=<?php echo $payroll_id; ?>'" class="btn-close">← Back</button>
     </div>
-    
-    <?php if($total_pages > 1): ?>
-    <div class="no-print pagination-controls">
-        <strong>Page <?php echo $page; ?> of <?php echo $total_pages; ?></strong><br><br>
-        <?php if($page > 1): ?>
-            <a href="?id=<?php echo $payroll_id; ?>&page=<?php echo $page - 1; ?>">◀ Previous Page</a>
-        <?php endif; ?>
-        
-        <?php for($i = 1; $i <= $total_pages; $i++): ?>
-            <?php if($i == $page): ?>
-                <span><?php echo $i; ?></span>
-            <?php else: ?>
-                <a href="?id=<?php echo $payroll_id; ?>&page=<?php echo $i; ?>"><?php echo $i; ?></a>
-            <?php endif; ?>
-        <?php endfor; ?>
-        
-        <?php if($page < $total_pages): ?>
-            <a href="?id=<?php echo $payroll_id; ?>&page=<?php echo $page + 1; ?>">Next Page ▶</a>
-        <?php endif; ?>
-    </div>
-    <?php endif; ?>
-    
+
     <?php
-    // Generate pages
+    // Generate all pages for printing
     for($current_page = 1; $current_page <= $total_pages; $current_page++):
         $page_start = ($current_page - 1) * $rows_per_page;
         $page_scholars = array_slice($scholars, $page_start, $rows_per_page);
@@ -400,7 +379,7 @@ $page_scholars = array_slice($scholars, $start_index, $rows_per_page);
                 <?php 
                 $row_counter = 1;
                 foreach($page_scholars as $scholar):
-                    $student_id = !empty($scholar->ID_NUMBER) ? $scholar->ID_NUMBER : $scholar->LRN;
+                    $student_id = !empty($scholar->LRN) ? $scholar->LRN : $scholar->ID_NUMBER;
                 ?>
                 <tr>
                     <td class="text-center"><?php echo $page_counter++; ?>.<?php echo "\n"; ?>

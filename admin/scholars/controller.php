@@ -30,6 +30,9 @@ switch ($action) {
     case 'disburse_payroll':
         disbursePayroll();
         break;
+    case 'sync_payroll_scholars':
+        syncPayrollScholars();
+        break;
     case 'mark_stipend_paid':
         markStipendPaid();
         break;
@@ -300,10 +303,10 @@ function doGraduate() {
 function generatePayroll() {
     global $mydb;
     
-    $payment_date = $_POST['payment_date'];
-    $school_year_id = $_POST['school_year_id'];
-    $semester = $_POST['semester'];
-    $stipend_amount = $_POST['stipend_amount'];
+    $payment_date = isset($_POST['payment_date']) ? $_POST['payment_date'] : date('Y-m-d');
+    $school_year_id = isset($_POST['school_year_id']) ? intval($_POST['school_year_id']) : 0;
+    $semester = isset($_POST['semester']) ? $_POST['semester'] : '';
+    $stipend_amount = isset($_POST['stipend_amount']) ? floatval($_POST['stipend_amount']) : 0;
     $remarks = $_POST['remarks'];
     
     // Check if payroll already exists for this school year and semester
@@ -316,12 +319,24 @@ function generatePayroll() {
         return;
     }
     
-    // Get all approved renewals for this school year
+    // Get school year name for matching and logging
+    $mydb->setQuery("SELECT school_year FROM tbl_school_years WHERE id = '$school_year_id'");
+    $mydb->executeQuery();
+    $sy = $mydb->loadSingleResult();
+    if (!$sy) {
+        message("Selected School Year not found!", "error");
+        redirect(web_root . "admin/scholars/index.php?view=payroll");
+        return;
+    }
+    $sy_name = $sy->school_year;
+
+    // Get all approved renewals for this specific school year and semester
     $mydb->setQuery("
         SELECT sr.scholar_id, sa.AMOUNT as monthly_stipend 
         FROM tbl_scholar_renewals sr
         LEFT JOIN tbl_scholarship_awards sa ON sr.scholar_id = sa.APPLICANTID AND sa.STATUS = 'Active'
         WHERE sr.school_year_id = '$school_year_id' AND sr.status = 'approved'
+        AND sa.SCHOOL_YEAR = '$sy_name' AND sa.SEMESTER = '$semester'
     ");
     $mydb->executeQuery();
     $renewals = $mydb->loadResultList();
@@ -352,11 +367,6 @@ function generatePayroll() {
     $mydb->executeQuery();
     $payroll_id = $mydb->insert_id();
     
-    // Get school year name for logging
-    $mydb->setQuery("SELECT school_year FROM tbl_school_years WHERE id = '$school_year_id'");
-    $mydb->executeQuery();
-    $sy = $mydb->loadSingleResult();
-    
     // Add payroll details for each scholar
     foreach($scholar_list as $scholar) {
         $mydb->setQuery("
@@ -371,6 +381,73 @@ function generatePayroll() {
     
     message("Payroll generated successfully for $semester with " . count($scholar_list) . " renewed scholars!", "success");
     redirect(web_root . "admin/scholars/index.php?view=payroll");
+}
+
+function syncPayrollScholars() {
+    global $mydb;
+    $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+    
+    // Get current payroll metadata
+    $mydb->setQuery("SELECT p.*, sy.school_year FROM tbl_payroll p 
+                     LEFT JOIN tbl_school_years sy ON p.school_year_id = sy.id 
+                     WHERE p.id = $id");
+    $payroll = $mydb->loadSingleResult();
+    
+    if (!$payroll) {
+        message("Payroll not found!", "error");
+        redirect("index.php?view=payroll");
+        return;
+    }
+    
+    if ($payroll->status != 'pending') {
+        message("Only pending payrolls can be synced!", "error");
+        redirect("index.php?view=payroll_details&id=$id");
+        return;
+    }
+
+    $sy_id = $payroll->school_year_id;
+    $sy_name = $payroll->school_year;
+    $semester = $payroll->semester;
+
+    // Get a default amount from existing entries in this batch for fallback
+    $mydb->setQuery("SELECT amount FROM tbl_payroll_details WHERE payroll_id = $id LIMIT 1");
+    $default_row = $mydb->loadSingleResult();
+    $fallback_amount = $default_row ? floatval($default_row->amount) : 5000.00;
+
+    // Find approved renewals for this SY/Semester that are NOT in the payroll details
+    $mydb->setQuery("
+        SELECT sr.scholar_id, sa.AMOUNT as monthly_stipend 
+        FROM tbl_scholar_renewals sr
+        INNER JOIN tbl_scholarship_awards sa ON sr.scholar_id = sa.APPLICANTID AND sa.STATUS = 'Active'
+        WHERE sr.school_year_id = '$sy_id' AND sr.status = 'approved'
+        AND sa.SCHOOL_YEAR = '$sy_name' AND sa.SEMESTER = '$semester'
+        AND sr.scholar_id NOT IN (SELECT scholar_id FROM tbl_payroll_details WHERE payroll_id = $id)
+    ");
+    $missing_scholars = $mydb->loadResultList();
+    
+    if (!$missing_scholars || count($missing_scholars) == 0) {
+        message("No additional renewed scholars found to add.", "info");
+        redirect("index.php?view=payroll_details&id=$id");
+        return;
+    }
+
+    $added_count = 0;
+    $added_amount = 0;
+    foreach ($missing_scholars as $scholar) {
+        $amount = ($scholar->monthly_stipend && $scholar->monthly_stipend > 0) ? $scholar->monthly_stipend : $fallback_amount;
+        $mydb->setQuery("INSERT INTO tbl_payroll_details (payroll_id, scholar_id, amount, payment_status) 
+                         VALUES ($id, '{$scholar->scholar_id}', '$amount', 'pending')");
+        $mydb->executeQuery();
+        $added_count++;
+        $added_amount += $amount;
+    }
+
+    $mydb->setQuery("UPDATE tbl_payroll SET total_amount = total_amount + $added_amount WHERE id = $id");
+    $mydb->executeQuery();
+
+    logActivity("Synced Payroll", "Added $added_count scholars to payroll ID: $id. Total amount increased by ₱" . number_format($added_amount, 2));
+    message("Successfully added $added_count renewed scholars to the payroll!", "success");
+    redirect("index.php?view=payroll_details&id=$id");
 }
 
 function approvePayroll() {

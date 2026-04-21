@@ -27,6 +27,10 @@ switch ($view) {
         $content = 'edit_user.php';
         $subtitle = 'Edit User';
         break;
+    case 'school_years':
+        $content = 'school_years.php';
+        $subtitle = 'Manage School Years';
+        break;
     case 'settings':
         $content = 'settings.php';
         $subtitle = 'System Settings';

@@ -668,7 +668,7 @@ function doBatchInterviewResults() {
             // Update Applicant Status based on Recommendation
             $new_status = 'For Interview';
             if ($recommendation === 'Pass') {
-                $new_status = 'Pending'; // Moves to For Evaluation stage
+                $new_status = 'For Evaluation'; // Moves to For Evaluation stage
             } elseif ($recommendation === 'Fail') {
                 $new_status = 'Rejected';
             }

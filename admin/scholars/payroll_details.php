@@ -85,6 +85,11 @@ foreach($scholars as $scholar) {
             <i class="fa fa-check"></i> Approve Payroll
         </a>
         <?php endif; ?>
+        <?php if($payroll->status == 'pending' && ($_SESSION['ADMIN_ROLE'] == 'Super Admin' || $_SESSION['ADMIN_ROLE'] == 'Admin')): ?>
+        <a href="controller.php?action=sync_payroll_scholars&id=<?php echo $payroll_id; ?>" class="btn btn-warning" onclick="return confirm('This will check for approved renewals that were not included when this payroll was generated and add them. Continue?')">
+            <i class="fa fa-refresh"></i> Sync Renewed Scholars
+        </a>
+        <?php endif; ?>
         <?php if($payroll->status == 'approved' && ($_SESSION['ADMIN_ROLE'] == 'Super Admin' || $_SESSION['ADMIN_ROLE'] == 'Admin')): ?>
         <button onclick="disbursePayroll(<?php echo $payroll_id; ?>)" class="btn btn-primary">
             <i class="fa fa-money"></i> Mark as Disbursed

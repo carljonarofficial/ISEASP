@@ -647,7 +647,8 @@ function doBatchAddEdit() {
                 $mydb->executeQuery();
 
                 // Handle status changes for interviews
-                if ($exam_status == 'Passed' && $old_status != 'Passed') {
+                if ($exam_status == 'Passed') {
+
                     // Check if interview record already exists
                     $check_sql = "SELECT COUNT(*) as count FROM tbl_interview WHERE APPLICANTID = $applicant_id";
                     $mydb->setQuery($check_sql);
@@ -666,12 +667,17 @@ function doBatchAddEdit() {
 
                         $mydb->setQuery($interview_sql);
                         $mydb->executeQuery();
-
-                        // Update applicant status
-                        $status_sql = "UPDATE tbl_applicants SET STATUS = 'For Interview' WHERE APPLICANTID = $applicant_id";
-                        $mydb->setQuery($status_sql);
+                    } else {
+                        // If interview already exists, update interview record status to For Interview
+                        $update_interview_sql = "UPDATE tbl_interview SET RECOMMENDATION = 'For Review', COMMENTS = 'Updated after exam result change' WHERE APPLICANTID = $applicant_id";
+                        $mydb->setQuery($update_interview_sql);
                         $mydb->executeQuery();
                     }
+
+                    // Update applicant status
+                    $status_sql = "UPDATE tbl_applicants SET STATUS = 'For Interview' WHERE APPLICANTID = $applicant_id";
+                    $mydb->setQuery($status_sql);
+                    $mydb->executeQuery();
                 } elseif ($exam_status == 'Failed') {
                     // Delete any existing interview for failed applicants
                     $delete_interview_sql = "DELETE FROM tbl_interview WHERE APPLICANTID = $applicant_id";
