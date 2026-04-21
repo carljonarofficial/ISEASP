@@ -58,7 +58,7 @@ switch($stage) {
         break;
     case 'exam':
         $where[] = "a.EXAM_STATUS IN ('Passed', 'Failed')";
-        $where[] = "a.STATUS NOT IN ('Qualified', 'Scholar')";
+        $where[] = "a.STATUS NOT IN ('For Evaluation','Qualified', 'Scholar')";
         break;
     case 'evaluation':
         $where[] = "a.EXAM_STATUS = 'Passed' AND a.STATUS = 'For Evaluation'";
