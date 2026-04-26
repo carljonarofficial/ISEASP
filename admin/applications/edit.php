@@ -38,6 +38,12 @@ $mydb->executeQuery();
 $logs = $mydb->loadResultList();
 ?>
 
+<style>
+    input[type="text"]:not([name="EMAIL"]), textarea {
+        text-transform: uppercase;
+    }
+</style>
+
 <div class="row">
     <div class="col-lg-12">
         <h1 class="page-header">Edit Applicant</h1>
@@ -50,7 +56,7 @@ $logs = $mydb->loadResultList();
     <li><a data-toggle="tab" href="#educational">Educational</a></li>
     <li><a data-toggle="tab" href="#contact">Contact</a></li>
     <li><a data-toggle="tab" href="#socio">Socio-Economic</a></li>
-    <li><a data-toggle="tab" href="#status">Status</a></li>
+    <!-- <li><a data-toggle="tab" href="#status">Status</a></li> -->
     <li><a data-toggle="tab" href="#history">History</a></li>
 </ul>
 
@@ -66,27 +72,27 @@ $logs = $mydb->loadResultList();
                     <div class="form-group">
                         <label class="col-md-2 control-label">First Name: <span class="text-danger">*</span></label>
                         <div class="col-md-4">
-                            <input class="form-control input-sm" name="FIRSTNAME" value="<?php echo htmlspecialchars($app->FIRSTNAME); ?>" required>
+                            <input class="form-control input-sm" name="FIRSTNAME" value="<?php echo htmlspecialchars(strtoupper($app->FIRSTNAME)); ?>" required>
                         </div>
                         
                         <label class="col-md-2 control-label">Middle Name:</label>
                         <div class="col-md-4">
-                            <input class="form-control input-sm" name="MIDDLENAME" value="<?php echo htmlspecialchars($app->MIDDLENAME); ?>">
+                            <input class="form-control input-sm" name="MIDDLENAME" value="<?php echo ($app->MIDDLENAME !== '') ? htmlspecialchars(strtoupper($app->MIDDLENAME)) : ''; ?>">
                         </div>
                     </div>
                     
                     <div class="form-group">
                         <label class="col-md-2 control-label">Last Name: <span class="text-danger">*</span></label>
                         <div class="col-md-4">
-                            <input class="form-control input-sm" name="LASTNAME" value="<?php echo htmlspecialchars($app->LASTNAME); ?>" required>
+                            <input class="form-control input-sm" name="LASTNAME" value="<?php echo htmlspecialchars(strtoupper($app->LASTNAME)); ?>" required>
                         </div>
                         
                         <label class="col-md-2 control-label">Suffix:</label>
                         <div class="col-md-4">
                             <select class="form-control input-sm" name="SUFFIX">
                                 <option value="">None</option>
-                                <option value="Jr." <?php if($app->SUFFIX == 'Jr.') echo 'selected'; ?>>Jr.</option>
-                                <option value="Sr." <?php if($app->SUFFIX == 'Sr.') echo 'selected'; ?>>Sr.</option>
+                                <option value="JR." <?php if($app->SUFFIX == 'JR.') echo 'selected'; ?>>JR.</option>
+                                <option value="SR." <?php if($app->SUFFIX == 'SR.') echo 'selected'; ?>>SR.</option>
                                 <option value="II" <?php if($app->SUFFIX == 'II') echo 'selected'; ?>>II</option>
                                 <option value="III" <?php if($app->SUFFIX == 'III') echo 'selected'; ?>>III</option>
                                 <option value="IV" <?php if($app->SUFFIX == 'IV') echo 'selected'; ?>>IV</option>
@@ -109,7 +115,7 @@ $logs = $mydb->loadResultList();
                         
                         <label class="col-md-2 control-label">Birthplace:</label>
                         <div class="col-md-4">
-                            <input class="form-control input-sm" name="BIRTHPLACE" value="<?php echo htmlspecialchars($app->BIRTHPLACE); ?>">
+                            <input class="form-control input-sm" name="BIRTHPLACE" value="<?php echo htmlspecialchars(strtoupper($app->BIRTHPLACE)); ?>">
                         </div>
                     </div>
                     
@@ -137,11 +143,11 @@ $logs = $mydb->loadResultList();
                     <div class="form-group">
                         <label class="col-md-2 control-label">Religion:</label>
                         <div class="col-md-4">
-                            <input class="form-control input-sm" name="RELIGION" value="<?php echo htmlspecialchars($app->RELIGION); ?>">
+                            <input class="form-control input-sm" name="RELIGION" value="<?php echo htmlspecialchars(strtoupper($app->RELIGION)); ?>">
                         </div>
                         <label class="col-md-2 control-label">Nationality:</label>
                         <div class="col-md-4">
-                            <input class="form-control input-sm" name="NATIONALITY" value="<?php echo htmlspecialchars($app->NATIONALITY ?? 'Filipino'); ?>">
+                            <input class="form-control input-sm" name="NATIONALITY" value="<?php echo htmlspecialchars(strtoupper($app->NATIONALITY ?? 'FILIPINO')); ?>">
                         </div>
                     </div>
                 </div>
@@ -168,10 +174,10 @@ $logs = $mydb->loadResultList();
                             <select class="form-control input-sm" name="MUNICIPALITY" required id="municipality">
                                 <option value="">Select Municipality</option>
                                 <?php foreach($municipalities as $town): ?>
-                                <option value="<?= htmlspecialchars($town->MUNICIPALITY_NAME) ?>" 
-                                    data-district="<?= htmlspecialchars($town->DISTRICT) ?>"
-                                    <?php if($app->MUNICIPALITY == $town->MUNICIPALITY_NAME) echo 'selected'; ?>>
-                                    <?= htmlspecialchars($town->MUNICIPALITY_NAME) ?>
+                                <option value="<?= strtoupper($town->MUNICIPALITY_NAME) ?>" 
+                                    data-district="<?= strtoupper($town->DISTRICT) ?>"
+                                    <?php if($app->MUNICIPALITY == strtoupper($town->MUNICIPALITY_NAME)) echo 'selected'; ?>>
+                                    <?= strtoupper($town->MUNICIPALITY_NAME) ?>
                                 </option>
                                 <?php endforeach; ?>
                             </select>
@@ -181,21 +187,21 @@ $logs = $mydb->loadResultList();
                     <div class="form-group">
                         <label class="col-md-2 control-label">Barangay:</label>
                         <div class="col-md-4">
-                            <input class="form-control input-sm" name="BARANGAY" value="<?php echo htmlspecialchars($app->BARANGAY); ?>">
+                            <input class="form-control input-sm" name="BARANGAY" value="<?php echo htmlspecialchars(strtoupper($app->BARANGAY)); ?>">
                         </div>
                     </div>
                     
                     <div class="form-group">
                         <label class="col-md-2 control-label">Permanent Address:</label>
                         <div class="col-md-10">
-                            <textarea class="form-control input-sm" name="PERMANENT_ADDRESS" rows="2"><?php echo htmlspecialchars($app->PERMANENT_ADDRESS); ?></textarea>
+                            <textarea class="form-control input-sm" name="PERMANENT_ADDRESS" rows="2"><?php echo htmlspecialchars(strtoupper($app->PERMANENT_ADDRESS)); ?></textarea>
                         </div>
                     </div>
                     
                     <div class="form-group">
                         <label class="col-md-2 control-label">Current Address:</label>
                         <div class="col-md-10">
-                            <textarea class="form-control input-sm" name="CURRENT_ADDRESS" rows="2"><?php echo htmlspecialchars($app->CURRENT_ADDRESS); ?></textarea>
+                            <textarea class="form-control input-sm" name="CURRENT_ADDRESS" rows="2"><?php echo htmlspecialchars(strtoupper($app->CURRENT_ADDRESS)); ?></textarea>
                         </div>
                     </div>
                 </div>
@@ -210,12 +216,12 @@ $logs = $mydb->loadResultList();
                     <div class="form-group">
                         <label class="col-md-2 control-label">School: <span class="text-danger">*</span></label>
                         <div class="col-md-4">
-                            <input class="form-control input-sm" name="SCHOOL" value="<?php echo htmlspecialchars($app->SCHOOL); ?>" required>
+                            <input class="form-control input-sm" name="SCHOOL" value="<?php echo htmlspecialchars(strtoupper($app->SCHOOL)); ?>" required>
                         </div>
                         
                         <label class="col-md-2 control-label">Course: <span class="text-danger">*</span></label>
                         <div class="col-md-4">
-                            <input class="form-control input-sm" name="COURSE" value="<?php echo htmlspecialchars($app->COURSE); ?>" required>
+                            <input class="form-control input-sm" name="COURSE" value="<?php echo htmlspecialchars(strtoupper($app->COURSE)); ?>" required>
                         </div>
                     </div>
                     
@@ -242,8 +248,8 @@ $logs = $mydb->loadResultList();
                         <label class="col-md-2 control-label">Application Type:</label>
                         <div class="col-md-4">
                             <select class="form-control input-sm" name="APPLICATION_TYPE">
-                                <option value="New Applicant" <?php if($app->APPLICATION_TYPE == 'New Applicant') echo 'selected'; ?>>New Applicant</option>
-                                <option value="Renewal" <?php if($app->APPLICATION_TYPE == 'Renewal') echo 'selected'; ?>>Renewal</option>
+                                <option value="NEW APPLICANT" <?php if($app->APPLICATION_TYPE == 'NEW APPLICANT') echo 'selected'; ?>>NEW APPLICANT</option>
+                                <option value="RENEWAL" <?php if($app->APPLICATION_TYPE == 'RENEWAL') echo 'selected'; ?>>RENEWAL</option>
                             </select>
                         </div>
                         
@@ -280,19 +286,19 @@ $logs = $mydb->loadResultList();
                     <div class="form-group">
                         <label class="col-md-2 control-label">Facebook URL:</label>
                         <div class="col-md-4">
-                            <input class="form-control input-sm" name="FACEBOOK_URL" value="<?php echo htmlspecialchars($app->FACEBOOK_URL); ?>">
+                            <input class="form-control input-sm" name="FACEBOOK_URL" value="<?php echo ($app->FACEBOOK_URL !== '') ? htmlspecialchars($app->FACEBOOK_URL) : ''; ?>">
                         </div>
                     </div>
                     
                     <div class="form-group">
                         <label class="col-md-2 control-label">Emergency Contact:</label>
                         <div class="col-md-4">
-                            <input class="form-control input-sm" name="EMERGENCY_CONTACT_NAME" value="<?php echo htmlspecialchars($app->EMERGENCY_CONTACT_NAME); ?>" placeholder="Full Name">
+                            <input class="form-control input-sm" name="EMERGENCY_CONTACT_NAME" value="<?php echo ($app->EMERGENCY_CONTACT_NAME !== '') ? htmlspecialchars(strtoupper($app->EMERGENCY_CONTACT_NAME)) : ''; ?>" placeholder="Full Name">
                         </div>
                         
                         <label class="col-md-2 control-label">Emergency No.:</label>
                         <div class="col-md-4">
-                            <input class="form-control input-sm" name="EMERGENCY_CONTACT_NUMBER" value="<?php echo htmlspecialchars($app->EMERGENCY_CONTACT_NUMBER); ?>">
+                            <input class="form-control input-sm" name="EMERGENCY_CONTACT_NUMBER" value="<?php echo ($app->EMERGENCY_CONTACT_NUMBER !== '') ? htmlspecialchars($app->EMERGENCY_CONTACT_NUMBER) : ''; ?>">
                         </div>
                     </div>
                     
@@ -344,7 +350,7 @@ $logs = $mydb->loadResultList();
                         
                         <label class="col-md-2 control-label">Parent's Occupation:</label>
                         <div class="col-md-4">
-                            <input class="form-control input-sm" name="PARENT_OCCUPATION" value="<?php echo htmlspecialchars($app->PARENT_OCCUPATION); ?>">
+                            <input class="form-control input-sm" name="PARENT_OCCUPATION" value="<?php echo ($app->PARENT_OCCUPATION !== '') ? htmlspecialchars(strtoupper($app->PARENT_OCCUPATION)) : ''; ?>">
                         </div>
                     </div>
                 </div>
@@ -352,7 +358,7 @@ $logs = $mydb->loadResultList();
         </div>
 
         <!-- Status Tab -->
-        <div id="status" class="tab-pane fade">
+        <!-- <div id="status" class="tab-pane fade">
             <div class="panel panel-default" style="margin-top: 20px;">
                 <div class="panel-heading">Application Status</div>
                 <div class="panel-body">
@@ -402,7 +408,7 @@ $logs = $mydb->loadResultList();
                     </div>
                 </div>
             </div>
-        </div>
+        </div> -->
 
         <!-- History Tab -->
         <div id="history" class="tab-pane fade">
@@ -458,7 +464,7 @@ document.getElementById('municipality').addEventListener('change', function() {
     if(district) {
         document.getElementById('district').value = district;
     }
-});
+}); 
 
 $(document).ready(function() {
     var hash = window.location.hash;
@@ -468,6 +474,15 @@ $(document).ready(function() {
     
     $('a[data-toggle="tab"]').on('shown.bs.tab', function(e) {
         window.location.hash = e.target.hash;
+    });
+});
+
+// Auto-uppercase inputs
+document.querySelectorAll('input[type="text"], textarea').forEach(function(input) {
+    input.addEventListener('input', function() {
+        if (this.type !== 'email' && !this.name.toLowerCase().includes('email')) {
+            this.value = this.value.toUpperCase();
+        }
     });
 });
 </script>

@@ -98,12 +98,12 @@ global $mydb;
 <!-- Action Buttons -->
 <div class="row">
     <div class="col-lg-12" style="margin-bottom: 15px;">
-        <a href="index.php?view=list" class="btn btn-primary">
+        <a href="../applications/index.php?stage=scholar" class="btn btn-primary">
             <i class="fa fa-arrow-left"></i> Back to Scholars
         </a>
-        <a href="#" onclick="window.print()" class="btn btn-default">
+        <!-- <a href="#" onclick="window.print()" class="btn btn-default">
             <i class="fa fa-print"></i> Print List
-        </a>
+        </a> -->
     </div>
 </div>
 

@@ -32,11 +32,15 @@ $sql = "SELECT
             a.EXAM_STATUS,
             a.REQUIREMENT_STATUS,
             a.APPLICATION_TYPE,
+            (SELECT SEMESTER FROM tbl_renewal_applications WHERE APPLICANTID = a.APPLICANTID ORDER BY CREATED_AT DESC LIMIT 1) as RENEWED_SEMESTER,
+            (SELECT SCHOOL_YEAR FROM tbl_renewal_applications WHERE APPLICANTID = a.APPLICANTID ORDER BY CREATED_AT DESC LIMIT 1) as RENEWED_SCHOOL_YEAR,
+            (SELECT STATUS FROM tbl_renewal_applications WHERE APPLICANTID = a.APPLICANTID ORDER BY CREATED_AT DESC LIMIT 1) as RENEWAL_STATUS,
             a.DATECREATED,
             (SELECT COUNT(*) FROM tbl_applicant_requirement_checklist 
              WHERE APPLICANTID = a.APPLICANTID AND IS_VERIFIED = 1) as VERIFIED_REQ,
             (SELECT COUNT(*) FROM tbl_requirement WHERE REQUIRED = 'Yes') as TOTAL_REQ
         FROM tbl_applicants a
+        LEFT JOIN tbl_renewal_applications ra ON a.APPLICANTID = ra.APPLICANTID
         WHERE a.LRN = '$lrn'";
 
 $mydb->setQuery($sql);
@@ -80,9 +84,14 @@ $response = [
         'requirement_status' => $applicant->REQUIREMENT_STATUS ?? 'Pending',
         'application_type' => $applicant->APPLICATION_TYPE ?? 'New Applicant',
         'date_applied' => $applicant->DATECREATED ? date('F d, Y', strtotime($applicant->DATECREATED)) : 'N/A',
+        'semester' => $applicant->SEMESTER ?? 'N/A',
+        'school_year' => $applicant->SCHOOL_YEAR ?? 'N/A',
         'requirements_progress' => ($applicant->TOTAL_REQ > 0) ? round(($applicant->VERIFIED_REQ / $applicant->TOTAL_REQ) * 100) : 0,
         'verified_requirements' => $applicant->VERIFIED_REQ ?? 0,
-        'total_requirements' => $applicant->TOTAL_REQ ?? 0
+        'total_requirements' => $applicant->TOTAL_REQ ?? 0,
+        'renewal_semester' => $applicant->RENEWED_SEMESTER ?? 'N/A',
+        'renewal_school_year' => $applicant->RENEWED_SCHOOL_YEAR ?? 'N/A',
+        'renewal_status' => $applicant->RENEWAL_STATUS ?? 'N/A'
     ]
 ];
 
@@ -94,8 +103,14 @@ switch($applicant->STATUS) {
     case 'Qualified':
         $response['data']['message'] = 'You are qualified for the scholarship! Please wait for further instructions from the ISEASP office.';
         break;
+    case 'For Evaluation':
+        $response['data']['message'] = 'Your application is currently under evaluation. Please check back later for updates.';
+        break;
     case 'For Interview':
         $response['data']['message'] = 'You are scheduled for an interview. Please check your email for the schedule and venue details.';
+        break;
+    case 'For Exam':
+        $response['data']['message'] = 'You are scheduled for an entrance exam. Please check the FB Page for the schedule and venue details.';
         break;
     case 'Pending':
         if ($applicant->REQUIREMENT_STATUS == 'Incomplete') {

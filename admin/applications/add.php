@@ -654,6 +654,10 @@ textarea.form-control {
     border: 2px solid var(--success-color) !important;
     border-radius: 8px;
 }
+
+input[type="text"]:not([name="EMAIL"]), textarea {
+    text-transform: uppercase;
+}
 </style>
 
 <div class="container-fluid">
@@ -664,7 +668,7 @@ textarea.form-control {
         </h1>
     </div>
 
-    <div class="progress-indicator">
+    <!-- <div class="progress-indicator">
         <div class="progress-step active">
             <div class="step-number">1</div>
             <div class="step-label">Personal Info</div>
@@ -681,7 +685,7 @@ textarea.form-control {
             <div class="step-number">4</div>
             <div class="step-label">Requirements</div>
         </div>
-    </div>
+    </div> -->
 
     <div class="instruction-card">
         <div class="instruction-header">

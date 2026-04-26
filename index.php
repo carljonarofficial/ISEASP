@@ -8,6 +8,8 @@ require_once("include/initialize.php");
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ISEASP - Ilocos Sur Educational Assistance & Scholarship Program</title>
     
+    <!-- Favicon -->
+    <link rel="icon" href="<?php echo web_root; ?>uploads/iseasp_logo.ico" type="image/png">
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome 6 -->
@@ -537,9 +539,9 @@ require_once("include/initialize.php");
                     <li class="nav-item">
                         <a class="nav-link" href="#home">Home</a>
                     </li>
-                    <li class="nav-item">
+                    <!-- <li class="nav-item">
                         <a class="nav-link" href="#features">Features</a>
-                    </li>
+                    </li> -->
                     <li class="nav-item">
                         <a class="nav-link" href="#about">About</a>
                     </li>
@@ -721,6 +723,7 @@ require_once("include/initialize.php");
         var resultCard = $('#resultCard');
         
         // Determine status class and icon
+        // data.status can be 'Pending','Approved','Rejected','For Interview','Qualified','Scholar','Graduated','For Exam','For Evaluation'
         var statusInfo = getStatusInfo(data.status);
         
         // Build full name properly
@@ -804,8 +807,8 @@ require_once("include/initialize.php");
                 </span>
         `;
         
-        // Add exam status if available and not pending
-        if (data.exam_status && data.exam_status !== 'Pending' && data.exam_status !== '') {
+        // Add exam status if available and not pending (Only for For Exam or For Interview status)
+        if ((data.status === 'For Exam' || data.status === 'For Interview') && data.exam_status && data.exam_status !== 'Pending' && data.exam_status !== '') {
             var examClass = data.exam_status === 'Passed' ? 'badge-success' : 'badge-danger';
             var examIcon = data.exam_status === 'Passed' ? 'fa-check-circle' : 'fa-times-circle';
             html += `
@@ -815,20 +818,47 @@ require_once("include/initialize.php");
             `;
         }
         
-        // Add requirement status
+        // Add requirement status (Applicable for Pending, Approved, or Rejected status only)
         var reqClass = data.requirement_status === 'Complete' ? 'badge-success' : 'badge-warning';
         var reqIcon = data.requirement_status === 'Complete' ? 'fa-check-circle' : 'fa-exclamation-triangle';
         var reqText = data.requirement_status === 'Complete' ? 'COMPLETE' : (data.requirement_status || 'PENDING');
-        html += `
-            <span class="badge-custom ${reqClass}">
-                <i class="fas ${reqIcon}"></i> REQUIREMENTS: ${reqText}
-            </span>
-        `;
-        
+        if(data.status === 'Pending' || data.status === 'Approved' || data.status === 'Rejected') {
+            html += `
+                <span class="badge-custom ${reqClass}">
+                    <i class="fas ${reqIcon}"></i> REQUIREMENTS: ${reqText}
+                </span>
+            `;
+        }
+
+        // Determine the scholarship renewal status
+        var renewalStatusHTML = '';
+        if(data.renewal_status && data.renewal_status !== 'Pending') {
+            if(data.renewal_status === 'Approved') {
+                renewalStatusHTML += `
+                    <span class="badge-custom badge-success">
+                        <i class="fas fa-check-circle"></i> RENEWAL APPROVED
+                    </span>
+                    <span class="badge-custom badge-primary">
+                        <i class="fas fa-calendar-alt"></i> Recent Renewal Semester and School Year: ${escapeHtml(data.renewal_semester || 'N/A')} ${escapeHtml(data.renewal_school_year || 'N/A')}
+                    </span>
+                `;
+            } else if(data.renewal_status === 'Rejected') {
+                renewalStatusHTML += `
+                    <span class="badge-custom badge-danger">
+                        <i class="fas fa-times-circle"></i> RENEWAL REJECTED
+                    </span>
+                    <span class="badge-custom badge-primary">
+                        <i class="fas fa-calendar-alt"></i> Recent Renewal Semester and School Year: ${escapeHtml(data.renewal_semester || 'N/A')} ${escapeHtml(data.renewal_school_year || 'N/A')}
+                    </span>
+                `;
+            }
+        }
+
+        html += renewalStatusHTML;
         html += `</div>`;
         
-        // Add requirements progress bar
-        if (total > 0) {
+        // Add requirements progress bar (Applicable for Pending, Approved, or Rejected status only)
+        if ((data.status === 'Pending' || data.status === 'Approved' || data.status === 'Rejected') && total > 0) {
             html += `
                 <div style="margin-top: 20px;">
                     <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 8px;">
@@ -883,6 +913,13 @@ require_once("include/initialize.php");
                 icon: 'fa-users',
                 badgeClass: 'badge-warning',
                 displayText: 'FOR INTERVIEW',
+                borderColor: '#f39c12'
+            },
+            'For Exam': {
+                class: 'warning',
+                icon: 'fa-clipboard-list',
+                badgeClass: 'badge-warning',
+                displayText: 'FOR EXAM',
                 borderColor: '#f39c12'
             },
             'Pending': {

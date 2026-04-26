@@ -257,7 +257,9 @@ $logs = $mydb->loadResultList();
                                     $status_color = match($applicant->STATUS) {
                                         'Scholar' => 'success',
                                         'Qualified' => 'primary',
+                                        'For Exam' => 'warning',
                                         'For Interview' => 'info',
+                                        'For Evaluation' => 'default',
                                         'Pending' => 'warning',
                                         'Rejected' => 'danger',
                                         'Graduated' => 'success',
@@ -587,7 +589,7 @@ $logs = $mydb->loadResultList();
             <a href="../checklist/index.php?view=view&id=<?= $applicant->APPLICANTID ?>" class="btn btn-info">
                 <i class="fa fa-check-square-o"></i> Manage Requirements
             </a>
-            <?php if ($applicant->REQUIREMENT_STATUS == 'Complete' && empty($applicant->EXAM_SLIP_GENERATED)): ?>
+            <?php if ($applicant->STATUS === 'For Exam' && $applicant->REQUIREMENT_STATUS == 'Complete' && empty($applicant->EXAM_SLIP_GENERATED)): ?>
             <a href="index.php?view=exam_slip&id=<?= $applicant->APPLICANTID ?>" class="btn btn-warning">
                 <i class="fa fa-ticket"></i> Generate Exam Slip
             </a>

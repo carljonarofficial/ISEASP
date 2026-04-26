@@ -345,7 +345,6 @@ if(isset($_SESSION['ADMIN_USERID'])){
                 <div class="form-group">
                     <i class="fa fa-lock input-icon"></i>
                     <input type="password" class="form-control" placeholder="Password" name="user_pass" id="password" required>
-                    <i class="fa fa-eye password-toggle" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #95a5a6; z-index: 10;"></i>
                 </div>
                 
                 <div class="row">
@@ -436,7 +435,7 @@ if(isset($_SESSION['ADMIN_USERID'])){
                     $mydb->setQuery("UPDATE tblusers SET LAST_LOGIN = NOW(), IP_ADDRESS = '" . $_SERVER['REMOTE_ADDR'] . "' WHERE USERID = " . $_SESSION['ADMIN_USERID']);
                     $mydb->executeQuery();
                     
-                    message("Welcome back, " . $_SESSION['ADMIN_FULLNAME'] . "! You are logged in as " . $_SESSION['ADMIN_ROLE'], "success");
+                    // message("Welcome back, " . $_SESSION['ADMIN_FULLNAME'] . "! You are logged in as " . $_SESSION['ADMIN_ROLE'], "success");
                     redirect(web_root."admin/index.php");
                 }
             } else {

@@ -315,7 +315,7 @@ function doEdit() {
         $is_indigenous = isset($_POST['IS_INDIGENOUS']) ? trim($_POST['IS_INDIGENOUS']) : 'No';
         $family_income = !empty($_POST['FAMILY_ANNUAL_INCOME']) ? trim($_POST['FAMILY_ANNUAL_INCOME']) : "NULL";
         $parent_occupation = !empty($_POST['PARENT_OCCUPATION']) ? "'".trim($_POST['PARENT_OCCUPATION'])."'" : "NULL";
-        $status = trim($_POST['STATUS']);
+        // $status = trim($_POST['STATUS']);
 
         $sql = "UPDATE tbl_applicants SET
             FIRSTNAME = '$firstname',
@@ -349,8 +349,7 @@ function doEdit() {
             IS_4PS_BENEFICIARY = '$is_4ps',
             IS_INDIGENOUS = '$is_indigenous',
             FAMILY_ANNUAL_INCOME = $family_income,
-            PARENT_OCCUPATION = $parent_occupation,
-            STATUS = '$status'
+            PARENT_OCCUPATION = $parent_occupation
             WHERE APPLICANTID = $id";
 
         $mydb->setQuery($sql);
