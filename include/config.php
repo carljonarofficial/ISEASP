@@ -28,9 +28,9 @@ if (getenv('RENDER') !== false) {
 } else if (isset($_SERVER['HTTP_HOST']) && $_SERVER['HTTP_HOST'] === 'beta.iseasp-ims.online') {
     // Running on beta.iseasp-ims.online
     define('server', 'localhost');
-    define('user', 'u645317950_iseasp_ims');
-    define('pass', '_KZ8bst1Tj');
-    define('database_name', 'u645317950_iseasp_db');
+    define('user', '[Redacted]');
+    define('pass', '[Redacted]');
+    define('database_name', '[Redacted]');
     
     $web_root = "http://" . $_SERVER['HTTP_HOST'] . "/";
     define('web_root', $web_root);
