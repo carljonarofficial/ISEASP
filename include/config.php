@@ -25,6 +25,16 @@ if (getenv('RENDER') !== false) {
     
     $web_root = "https://" . $_SERVER['HTTP_HOST'] . "/";
     define('web_root', $web_root);
+} else if (isset($_SERVER['HTTP_HOST']) && $_SERVER['HTTP_HOST'] === 'beta.iseasp-ims.online') {
+    // Running on beta.iseasp-ims.online
+    define('server', 'localhost');
+    define('user', 'u645317950_iseasp_ims');
+    define('pass', '_KZ8bst1Tj');
+    define('database_name', 'u645317950_iseasp_db');
+    
+    $web_root = "http://" . $_SERVER['HTTP_HOST'] . "/";
+    define('web_root', $web_root);
+
 } else {
     // Local development
     define('server', 'localhost');

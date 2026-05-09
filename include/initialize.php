@@ -4,8 +4,9 @@ defined('DS') ? null : define('DS', DIRECTORY_SEPARATOR);
 
 // Detect if running on Render.com
 $is_render = getenv('RENDER') !== false;
+$is_beta = isset($_SERVER['HTTP_HOST']) && $_SERVER['HTTP_HOST'] === 'beta.iseasp-ims.online';
 
-if ($is_render) {
+if ($is_render || $is_beta) {
     defined('SITE_ROOT') ? null : define('SITE_ROOT', $_SERVER['DOCUMENT_ROOT']);
 } else {
     defined('SITE_ROOT') ? null : define('SITE_ROOT', $_SERVER['DOCUMENT_ROOT'] . DS . 'ISEASP');
