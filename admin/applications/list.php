@@ -619,12 +619,14 @@ $has_applicants = !empty($applicants);
                         <!-- <td><span class="label label-<?= getApplicantTypeColor($a->APPLICATION_TYPE) ?> status-badge"><?= $a->APPLICATION_TYPE ?? 'New' ?></span></td> -->
                         <td>
                             <?php if(($stage === 'all' || $stage === 'new') && $a->STATUS == 'Pending'): ?>
-                                <span class="label label-<?= getRequirementStatusColor($a->REQUIREMENT_STATUS) ?> status-badge"><?= $a->REQUIREMENT_STATUS?> Requirements<?= ($a->REQUIREMENT_STATUS === 'Complete' && $a->STATUS === 'Pending') ? ' | For Verifiation' : '' ?></span>
+                                <span class="label label-<?= getRequirementStatusColor($a->REQUIREMENT_STATUS) ?> status-badge"><?= ($a->REQUIREMENT_STATUS === 'Pending' ? '' : $a->REQUIREMENT_STATUS.' ') ?>Requirements<?= ($a->REQUIREMENT_STATUS === 'Complete' && $a->STATUS === 'Pending') ? ' | For Verifiation' : ' for Review' ?></span>
                             <?php endif; ?>
                             <?php if($stage === 'exam'):
                                 echo getExamStatusLabel(75, $a->TOTAL_SCORE); ?>
                             <?php endif; ?>
-                            <span class="label label-<?= getStatusColor($a->STATUS) ?> status-badge"><?= $a->STATUS ?? 'Pending' ?><?= ($stage === 'all' || $stage === 'new') ? ' Stage' : "" ?></span>
+                            <?php if(($stage === 'all' || $stage === 'new') && $a->STATUS !== 'Pending'): ?>
+                                <span class="label label-<?= getStatusColor($a->STATUS) ?> status-badge"><?= $a->STATUS ?? 'Pending' ?><?= ($stage === 'all' || $stage === 'new') ? ' Stage' : "" ?></span>
+                            <?php endif; ?>
                         </td>
                         <td><?= $a->GPA ?></td>
                         <td class="text-center no-print" onclick="event.cancelBubble=true; event.stopPropagation();">

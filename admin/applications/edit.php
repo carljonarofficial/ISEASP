@@ -286,7 +286,7 @@ $logs = $mydb->loadResultList();
                     <div class="form-group">
                         <label class="col-md-2 control-label">Facebook URL:</label>
                         <div class="col-md-4">
-                            <input class="form-control input-sm" name="FACEBOOK_URL" value="<?php echo ($app->FACEBOOK_URL !== '') ? htmlspecialchars($app->FACEBOOK_URL) : ''; ?>">
+                            <input class="form-control input-sm" name="FACEBOOK_URL" value="<?php echo $app->PARENT_OCCUPATION; ?>">
                         </div>
                     </div>
                     
@@ -350,7 +350,7 @@ $logs = $mydb->loadResultList();
                         
                         <label class="col-md-2 control-label">Parent's Occupation:</label>
                         <div class="col-md-4">
-                            <input class="form-control input-sm" name="PARENT_OCCUPATION" value="<?php echo ($app->PARENT_OCCUPATION !== '') ? htmlspecialchars(strtoupper($app->PARENT_OCCUPATION)) : ''; ?>">
+                            <input class="form-control input-sm" name="PARENT_OCCUPATION" value="<?php echo $app->PARENT_OCCUPATION; ?>">
                         </div>
                     </div>
                 </div>
