@@ -155,12 +155,12 @@ $has_applicants = !empty($applicants);
 .action-buttons {
     display: flex;
     gap: 4px;
-    justify-content: center;
+    justify-content: flex-end;
     align-items: center;
 }
 
 .action-buttons .btn-xs {
-    width: 28px;
+    width: 32px;
     height: 28px;
     padding: 0;
     display: inline-flex;
@@ -172,12 +172,11 @@ $has_applicants = !empty($applicants);
 }
 
 .action-buttons .dropdown .btn-xs {
-    width: auto;
     padding: 0 8px;
 }
 
 .action-buttons .btn-xs:hover {
-    transform: translateY(-2px);
+    /* transform: translateY(-2px); */
     box-shadow: 0 4px 8px rgba(0,0,0,0.15);
     filter: brightness(1.1);
 }

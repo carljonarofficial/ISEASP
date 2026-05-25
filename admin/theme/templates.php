@@ -188,7 +188,7 @@
         <aside class="main-sidebar">
             <section class="sidebar">
                 <!-- User Panel -->
-                <div class="user-panel">
+                <!-- <div class="user-panel">
                     <div class="pull-left image">
                         <img src="<?php echo web_root.'admin/user/photos/'. $singleuser->PICLOCATION;?>" class="img-circle" alt="User Image" width="45" height="45">
                     </div>
@@ -196,7 +196,7 @@
                         <p><?php echo $singleuser->FULLNAME; ?></p>
                         <a href="#"><i class="fa fa-circle text-success"></i> Online</a>
                     </div>
-                </div>
+                </div> -->
 
                 <!-- Search Form -->
                 <!-- <form action="#" method="get" class="sidebar-form">
